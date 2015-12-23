@@ -12,21 +12,27 @@
 
 #define DEBUG_MODE 1
 #define DATA_PATH "server_data/"
-#define MAXFRIENDS 100
-#define  MAXUSER 100
+#define MAX_FRIENDS 100
+#define MAX_USERS 100
 
 
+// Gestiona los ficheros del servidor
+// Se encarga de crear, eliminar y modificar usuarios
 
-//Gestiona los ficheros del servidor
-//Se encarga de crear, eliminar y modificar usuarios
-
+/*
 typedef struct {
 	int numUser;
 	User *listU[MAXUSER];
 }UserList;
+*/
 
-int serverInit(UserList* userlist);
-int addUser(UserList* userlist, char* username, char* password);
+// Número de usuarios en el servidor y lista de cada uno
+int numUsers;
+User *userlist[MAX_USERS];
+
+
+int serverInit();
+int addUser(char* username, char* password);
 
 
 

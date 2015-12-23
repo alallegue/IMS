@@ -11,7 +11,7 @@
 #define DEBUG_MODE 1
 
 //Usuarios registrados en el servidor
-UserList *userlist;
+//UserList *userlist;
 
 
 int main(int argc, char **argv){ 
@@ -36,7 +36,7 @@ int main(int argc, char **argv){
 	}
 
 	//Inicializar servidor
-	userlist = (UserList*)malloc(sizeof(UserList));
+	//userlist = (User*)malloc(sizeof(User));
 	serverInit(userlist);
 
 
@@ -131,7 +131,7 @@ int ims__login(struct soap *soap, char* username, char* password, int *error){
 
 int ims__registerUser(struct soap *soap, char* username, char* password, int *error) {
 	
-	addUser(userlist, username, password);
+	addUser(username, password);
 	
 	
 	

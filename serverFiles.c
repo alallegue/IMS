@@ -1,10 +1,10 @@
 #include "serverFiles.h"
 
 
-int serverInit(UserList* userlist) {
+int serverInit() {
 	DIR *dir,*user_dir,*dir_user;
 	FILE *user_pass_file;
-	struct dirent   *dit,*dit_user;
+	struct dirent *dit,*dit_user;
 	char *aux_path,*pass, *name;
 
 	aux_path = (char*)malloc(256*sizeof(char));
@@ -15,7 +15,7 @@ int serverInit(UserList* userlist) {
 	User *user;
 	
 	//Inicializar la lista de usuarios
-	userlist->numUser = 0;
+	numUsers = 0;
 	
 	printf("serverInit\n");
 	
@@ -150,22 +150,22 @@ int serverInit(UserList* userlist) {
 
 	//userlist->numUser = num_user;
 
-	if(DEBUG_MODE) printf("serverInit -> Exit Directorio: %s Users: %d\n",DATA_PATH,userlist->numUser);
+	if(DEBUG_MODE) printf("serverInit -> Exit Directorio: %s Users: %d\n",DATA_PATH,numUsers);
 
 	return 0;
 	
 }
 
-int addUser(UserList* userlist, char* username, char* password) {
+int addUser(char* username, char* password) {
 	// Insertar usuario en memoria
-	if(userlist->numUser >= MAXUSER){
+	if(numUsers >= MAX_USERS){
 		printf("El servidor ha alcanzado el límite de usuarios\n");
 		return -1; 
 	}
 	
 	int i = 0;
-	while(i < userlist->numUser){
-		if(strcmp(username,userlist->listU[i]->username) == 0){
+	while(i < numUsers){
+		if(strcmp(username,userlist[i]->username) == 0){
 			printf("El usuario ya estaba registrado\n");
 			return -1;
 		}
@@ -173,12 +173,12 @@ int addUser(UserList* userlist, char* username, char* password) {
 	}
 
 	User *usr = userInit(username, password);
-	userlist->listU[userlist->numUser] = usr;
-	userlist->numUser++;
+	userlist[numUsers] = usr;
+	numUsers++;
 
 	if(DEBUG_MODE) {
 		printf("addUser -> Usuario %s creado en memoria\n",username);
-		printf("num usuarios: %d\n", userlist->numUser);
+		printf("num usuarios: %d\n", numUsers);
 	}
 	
 	// Crear directorio y ficheros para el usuario:
@@ -210,7 +210,7 @@ int addUser(UserList* userlist, char* username, char* password) {
 	}
 
 	if(DEBUG_MODE){
-		printf("ims__addUser -> Añadido: %s %s\n",userlist->listU[userlist->numUser-1]->username,userlist->listU[userlist->numUser-1]->password);
+		printf("ims__addUser -> Añadido: %s %s\n",userlist[numUsers-1]->username,userlist[numUsers-1]->password);
 	}
 	
 	return 0;
