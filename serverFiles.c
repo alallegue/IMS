@@ -28,13 +28,13 @@ int serverInit() {
 	}
 	if(DEBUG_MODE) printf("serverInit -> Directorio: %s\n",DATA_PATH);
 	
-	/* Buscar usuarios en el directorio del servidor y crear la lista de usuarios
+	// Buscar usuarios en el directorio del servidor y crear la lista de usuarios
 	
 	// Recorrer el directorio server_data
 	while ((dit = readdir(dir)) != NULL){
 
 		if(strcmp(dit->d_name,".") != 0 && strcmp(dit->d_name,"..") != 0){
-			//LEER CLAVE
+			// LEER CLAVE
 			num_user++;
 			// Directorio del pass del usuario = aux_path
 			sprintf(aux_path,"%s%s/.pass",DATA_PATH,dit->d_name);
@@ -47,7 +47,7 @@ int serverInit() {
 			pass = (char*)malloc(256*sizeof(char));
 			fscanf( user_pass_file, "%s\\n", pass);
 
-			addUsers(luser,dit->d_name,pass);
+			addUser(dit->d_name,pass);
 			if(DEBUG_MODE){
 				printf("serverInit -> Se ha añadido: %s %s\n",dit->d_name,pass);
 			}
@@ -72,8 +72,8 @@ int serverInit() {
 					//fscanf(user_pass_file,"%s\\n",name);
 					name[strlen(name)-1] = '\0';
 					if(DEBUG_MODE) printf("serverInit -> Send: %s\n",name);
-					user = luser->listU[num_user-1];// Coger el usuario actual
-					addFriendRequestSend(user,name);
+					user = userlist[num_user-1];// Coger el usuario actual
+					//addFriendRequestSend(user,name); SIN HACER
 				}
 			}
 
@@ -93,8 +93,8 @@ int serverInit() {
 					//fscanf(user_pass_file,"%s\\n",name);
 					name[strlen(name)-1] = '\0';
 					if(DEBUG_MODE) printf("serverInit -> Pending: %s\n",name);
-					user = luser->listU[num_user-1];// Coger el usuario actual
-					addFriendRequestPending(user,name);
+					user = userlist[num_user-1];// Coger el usuario actual
+					//addFriendRequestPending(user,name); SIN HACER
 				}
 			}
 
@@ -109,15 +109,15 @@ int serverInit() {
 				return 0;
 			}
 			//num_friends = 0;
-			user = luser->listU[num_user-1];// Coger el usuario actual
+			user = userlist[num_user-1];// Coger el usuario actual
 
 			// Recorrer el directorio del usuario para añadir los amigos
 			while ((dit_user = readdir(dir_user)) != NULL){
 				if(strcmp(dit_user->d_name,".") != 0 && strcmp(dit_user->d_name,"..") != 0 && strcmp(dit_user->d_name,".pass") != 0
 				   && strcmp(dit_user->d_name,".pending") != 0 && strcmp(dit_user->d_name,".send") != 0){
-					addFriend(user,dit_user->d_name);
+					//addFriend(user,dit_user->d_name); SIN HACER
 					if(DEBUG_MODE){
-						printf("serverInit -> %s añade a %s\n",user->nick,dit_user->d_name);
+						//printf("serverInit -> %s añade a %s\n",user->nick,dit_user->d_name);
 					}
 					//num_friends++;
 				}
@@ -136,7 +136,6 @@ int serverInit() {
 		}
 
 	 }
-	 */
 	
 	free(aux_path);
 	/* int closedir(DIR *dir);
@@ -148,7 +147,7 @@ int serverInit() {
 	}
 
 
-	//userlist->numUser = num_user;
+	numUsers = num_user;
 
 	if(DEBUG_MODE) printf("serverInit -> Exit Directorio: %s Users: %d\n",DATA_PATH,numUsers);
 
