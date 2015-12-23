@@ -5,6 +5,7 @@
 
 char *username, *password;
 
+/* nueva versión*/ 
 
 /*Menú de bienvenida. 
  * Es el primero que se muestra y solicita
