@@ -7,6 +7,46 @@ char *username, *password;
 
 /* nueva versión*/ 
 
+/*Menú de bienvenida. 
+ * Es el primero que se muestra y solicita
+ * al usuario crear una cuenta o iniciar con una ya creada*/
+int show_login(struct soap soap, char *serverURL) {
+	int op = -1;
+	int res = -1;
+	
+	while(op != 0 && res != 0){
+		//system("clear");
+		printf("	Bienvenido. Selecciona una opcion: \n");
+		printf("	1) Entrar.\n");
+		printf("	2) Registrarse.\n");
+		printf("	0) Salir.\n");
+
+		scanf("%d",&op);
+		switch(op) {
+			case 1: //Login
+				res = login(soap, serverURL);
+				if(res == 0){ //Si se loguea correctamente entrar al menú principal
+					show_menu(soap, serverURL);
+				}
+				res = 1;
+				op = -1;
+				break;
+			case 2: //Registro
+				registerUser(soap,serverURL);
+				op = -1;
+				res = -1;
+				break;
+			case 0:
+				printf("Adios!\n");
+				break;
+			default:
+				break;
+		}
+	}
+
+	return res;
+}
+
 int login(struct soap soap,char *serverURL){
 	char* nick,*pass;
 	int res = 1;
@@ -109,47 +149,6 @@ int sendMessage(struct soap soap, char *serverURL) {
 		
 	*/	
 	return 0;
-}
-
-
-/*Menú de bienvenida. 
- * Es el primero que se muestra y solicita
- * al usuario crear una cuenta o iniciar con una ya creada*/
-int show_login(struct soap soap, char *serverURL) {
-	int op = -1;
-	int res = -1;
-	
-	while(op != 0 && res != 0){
-		//system("clear");
-		printf("	Bienvenido. Selecciona una opcion: \n");
-		printf("	1) Entrar.\n");
-		printf("	2) Registrarse.\n");
-		printf("	0) Salir.\n");
-
-		scanf("%d",&op);
-		switch(op) {
-			case 1: //Login
-				res = login(soap, serverURL);
-				if(res == 0){ //Si se loguea correctamente entrar al menú principal
-					show_menu(soap, serverURL);
-				}
-				res = 1;
-				op = -1;
-				break;
-			case 2: //Registro
-				registerUser(soap,serverURL);
-				op = -1;
-				res = -1;
-				break;
-			case 0:
-				printf("Adios!\n");
-				break;
-			default:
-				break;
-		}
-	}
-
-	return res;
 }
 
 /* Muestra el menú principal donde el usuario puede interactuar
