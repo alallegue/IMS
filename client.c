@@ -79,6 +79,7 @@ int registerUser(struct soap soap, char *serverURL) {
 	
 	return 0;
 }
+
 /* FIN */
 /* Baja de usuario. Pedir al servidor eliminar el usuario logueado */
 int deleteUser(struct soap soap, char *serverURL){
@@ -96,6 +97,21 @@ int deleteUser(struct soap soap, char *serverURL){
 		}
 		else printf("No hay conexion con el servidor\n");
 	}
+	return 0;
+}
+
+/* FIN */
+/* Pedir al servidor desconectar al usuario */
+int logout(struct soap soap,char* serverURL) {
+	int error = 1;
+	soap_call_ims__logout(&soap, serverURL, "", username, &error);
+	if(error == 0) {
+		free(username);
+		free(password);
+		printf("Te has desconectado\n");
+		return 1;
+	}
+	printf("No hay conexion con el servidor\n");
 	return 0;
 }
 
@@ -226,7 +242,7 @@ int show_menu(struct soap soap, char *serverURL) {
 				q = deleteUser(soap, serverURL);
 				break;
 			case 0: //Salir
-				q = 1;
+				q = logout(soap, serverURL);
 				break;
 			default:
 				printf("Opcion no valida, vuelve a intentarlo\n");

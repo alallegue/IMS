@@ -98,3 +98,9 @@ int ims__deleteUser(struct soap *soap, char* username, int *error) {
 	*error = deleteUser(username);	
 	return SOAP_OK;
 }
+
+int ims__logout(struct soap * soap, char* username, int *error) {
+	*error = logout(username);
+	return SOAP_OK;
+}
+

@@ -16,7 +16,7 @@ struct Files{
 typedef struct {
 	char* username;
 	char* password;
-	int online;
+	int logged;
 
 	//int numFriends;
 	//int numSend;

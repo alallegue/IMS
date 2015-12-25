@@ -155,6 +155,7 @@ int serverInit() {
 	
 }
 
+/* FIN */
 /* Guarda un usuario en el servidor, en memoria y creando los ficheros necesarios */
 int addUser(char* username, char* password) {
 	// Insertar usuario en memoria
@@ -176,7 +177,7 @@ int addUser(char* username, char* password) {
 	userlist[numUsers] = user;
 	numUsers++;
 
-	printf("Usuario %s insertado en memoria\n",username);
+	printf("Usuario %s insertado en memoria\n", userlist[numUsers-1]->username);
 	printf("Numero de usuarios en memoria: %d\n", numUsers);
 	
 	char path[50];
@@ -200,15 +201,16 @@ int addUser(char* username, char* password) {
 	printf("Fichero creado: %s\n", path);
 	fclose(file);
 
-	printf("Añadido usuario: %s con contraseña: %s al servidor\n", userlist[numUsers-1]->username, userlist[numUsers-1]->password);
+	printf("Añadido usuario: %s con contraseña: %s al servidor\n", username, password);
 	
 	return 0;
 }
 
+/* FIN */
 int login(char* username, char* password) {
 	int found = 0;
 	int i = 0;
-	User *user = NULL;
+	User *user;
 	while(i < numUsers && found == 0) {
 		if(strcmp(username, userlist[i]->username) == 0) {
 			found = 1;
@@ -218,7 +220,7 @@ int login(char* username, char* password) {
 	}
 	// Si el usuario existe y las contraseñas coinciden, loguear al usuario
 	if(found == 1 && strcmp(password, user->password) == 0) {
-		user->online = 1;
+		user->logged = 1;
 		printf("Usuario %s logueado correctamente\n", username);
 		return 0;
 	}
@@ -269,6 +271,28 @@ int deleteUser(char* username) {
 	sprintf(path, "rm -R %s%s", DATA_PATH, username);
 	system(path);
 	printf("Directorio %s eliminado\n", username);
+	
+	return 0;
+}
+
+/*  */
+int logout(char* username){
+	int found = 0;
+	int i = 0;
+	User *user;
+	// Obtener el usuario
+	while(i < numUsers && found == 0){
+		if(strcmp(username, userlist[i]->username) == 0){
+			found = 1;
+			user = userlist[i];
+		}
+		i++;
+	}
+	// Marcar desconectado
+	user->logged = 0;
+	//closeFiles(user);
+	userFree(user);
+	printf("Usuario %s desconectado\n", username);
 	
 	return 0;
 }

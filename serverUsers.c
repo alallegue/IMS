@@ -20,7 +20,7 @@ User* userInit(char* username,char* password){
 		user->files[i]->friend_nick = NULL;
 	}
 	*/
-	user->online = 0;
+	user->logged = 0;
 	//user->numFriends = 0;
 	//user->numSend = 0;
 	//user->numPending = 0;

@@ -27,5 +27,6 @@ int serverInit();
 int addUser(char* username, char* password);
 int login(char* username, char* password);
 int deleteUser(char* username);
+int logout(char* username);
 
 #endif
