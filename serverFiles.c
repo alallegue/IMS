@@ -1,6 +1,6 @@
 #include "serverFiles.h"
 
-
+/* Revisar */
 int serverInit() {
 	DIR *dir,*user_dir,*dir_user;
 	FILE *user_pass_file;
@@ -37,7 +37,7 @@ int serverInit() {
 			// LEER CLAVE
 			num_user++;
 			// Directorio del pass del usuario = aux_path
-			sprintf(aux_path,"%s%s/.pass",DATA_PATH,dit->d_name);
+			sprintf(aux_path,"%s%s/password",DATA_PATH,dit->d_name);
 
 			if((user_pass_file = fopen(aux_path, "r")) == NULL){
 				perror("Error abriendo fichero");
@@ -59,7 +59,7 @@ int serverInit() {
 			// LEER peticiones enviadas
 
 			// Directorio de la lista de enviados = aux_path
-			sprintf(aux_path,"%s%s/.send",DATA_PATH,dit->d_name);
+			sprintf(aux_path,"%s%s/enviados",DATA_PATH,dit->d_name);
 
 			if((user_pass_file = fopen(aux_path, "r")) == NULL) perror("Error abriendo fichero");
 
@@ -82,7 +82,7 @@ int serverInit() {
 			// LEER peticiones recibidas
 
 			// Directorio de la lista de enviados = aux_path
-			sprintf(aux_path,"%s%s/.pending",DATA_PATH,dit->d_name);
+			sprintf(aux_path,"%s%s/pendientes",DATA_PATH,dit->d_name);
 
 			if((user_pass_file = fopen(aux_path, "r")) == NULL) perror("Error abriendo fichero");
 
@@ -113,8 +113,8 @@ int serverInit() {
 
 			// Recorrer el directorio del usuario para añadir los amigos
 			while ((dit_user = readdir(dir_user)) != NULL){
-				if(strcmp(dit_user->d_name,".") != 0 && strcmp(dit_user->d_name,"..") != 0 && strcmp(dit_user->d_name,".pass") != 0
-				   && strcmp(dit_user->d_name,".pending") != 0 && strcmp(dit_user->d_name,".send") != 0){
+				if(strcmp(dit_user->d_name,".") != 0 && strcmp(dit_user->d_name,"..") != 0 && strcmp(dit_user->d_name,"password") != 0
+				   && strcmp(dit_user->d_name,"pendientes") != 0 && strcmp(dit_user->d_name,"pendientes") != 0){
 					//addFriend(user,dit_user->d_name); SIN HACER
 					if(DEBUG_MODE){
 						//printf("serverInit -> %s añade a %s\n",user->nick,dit_user->d_name);
@@ -131,8 +131,8 @@ int serverInit() {
 			free(pass);
 			free(name);
 			//user->numFriends = num_friends;
-				 //printf("\n%s", dit->d_name);
-				 //printf(" %d", dit->d_reclen);
+			//printf("\n%s", dit->d_name);
+			//printf(" %d", dit->d_reclen);
 		}
 
 	 }
@@ -155,6 +155,7 @@ int serverInit() {
 	
 }
 
+/* Guarda un usuario en el servidor, en memoria y creando los ficheros necesarios */
 int addUser(char* username, char* password) {
 	// Insertar usuario en memoria
 	if(numUsers >= MAX_USERS){
@@ -166,51 +167,63 @@ int addUser(char* username, char* password) {
 	while(i < numUsers){
 		if(strcmp(username,userlist[i]->username) == 0){
 			printf("El usuario ya estaba registrado\n");
-			return -1;
+			return -2;
 		}
 		i++;
 	}
 
-	User *usr = userInit(username, password);
-	userlist[numUsers] = usr;
+	User *user = userInit(username, password);
+	userlist[numUsers] = user;
 	numUsers++;
 
-	if(DEBUG_MODE) {
-		printf("addUser -> Usuario %s creado en memoria\n",username);
-		printf("num usuarios: %d\n", numUsers);
-	}
+	printf("Usuario %s insertado en memoria\n",username);
+	printf("Numero de usuarios en memoria: %d\n", numUsers);
 	
-	// Crear directorio y ficheros para el usuario:
-	// Enviados, pendientes y contraseña
-	//char *path = (char*)malloc(sizeof(char*));
-	char path[100];
-
-	sprintf(path,"%s%s%s","mkdir ",DATA_PATH, username);
-	if(DEBUG_MODE) printf("ims__addUser -> Path: %s\n",path);
-	system(path);
-
-	sprintf(path,"%s%s%s/%s","touch ",DATA_PATH,username,".send");
-	if(DEBUG_MODE) printf("ims__addUser -> Path: %s\n",path);
-	system(path);
-
-	sprintf(path,"%s%s%s/%s","touch ",DATA_PATH,username,".pending");
-	if(DEBUG_MODE) printf("ims__addUser -> Path: %s\n",path);
-	system(path);
-
-	sprintf(path,"%s/%s/%s",DATA_PATH,username,".pass");
+	char path[50];
+	// Crear el directorio del usuario
+	sprintf(path, "%s%s", DATA_PATH, username);
+	mkdir(path, 0777);
+	printf("Directorio creado: %s\n",path);
+	// Crear el fichero de mensajes enviados
+	sprintf(path,"%s%s/%s", DATA_PATH,username,"enviados");
+	creat(path, 0777);
+	printf("Fichero creado: %s\n", path);
+	// Crear el fichero de mensajes pendientes
+	sprintf(path,"%s%s/%s",DATA_PATH,username,"pendientes");
+	creat(path, 0777);
+	printf("Fichero creado: %s\n", path);
+	// Crear el fichero con la contraseña del usuario y almacenarla
+	sprintf(path,"%s%s/%s",DATA_PATH,username,"password");
 	FILE *file ;
-	if((file= fopen(path,"w+")) == NULL){
-		perror("Error creando fichero de usuario");
-	}
-	if(DEBUG_MODE) printf("ims__addUser -> Path: %s\n",path);
+	file= fopen(path,"w+");
 	fprintf(file,"%s",password);
-	if(fclose(file) == -1){
-		perror("Error cerrando fichero de usuario");
-	}
+	printf("Fichero creado: %s\n", path);
+	fclose(file);
 
-	if(DEBUG_MODE){
-		printf("ims__addUser -> Añadido: %s %s\n",userlist[numUsers-1]->username,userlist[numUsers-1]->password);
-	}
+	printf("Añadido usuario: %s con contraseña: %s al servidor\n", userlist[numUsers-1]->username, userlist[numUsers-1]->password);
 	
 	return 0;
 }
+
+int login(char* username, char* password) {
+	int found = 0;
+	int i = 0;
+	User *user = NULL;
+	while(i < numUsers && found == 0){
+		if(strcmp(username, userlist[i]->username) == 0){
+			found = 1;
+			user = userlist[i];
+		}
+		i++;
+	}
+	// Si el usuario existe y las contraseñas coinciden, loguear al usuario
+	if(found == 1 && strcmp(password, user->password) == 0){
+		user->online = 1;
+		printf("Usuario %s logueado correctamente\n", username);
+		return 0;
+	}
+	
+	printf("Login fallido\n");
+	return -1;
+}
+

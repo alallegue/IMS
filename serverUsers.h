@@ -3,7 +3,7 @@
 #include "soapH.h"
 #include <stdio.h>
 #define DEBUG_MODE 1
-#define DATA_PATH "server_data/"
+#define DATA_PATH "usuarios/"
 #define MAXFRIENDS 100
 
 
@@ -31,9 +31,7 @@ typedef struct {
 }User;
 
 
-
-User* createUser(char* username, char* password);
-void freeUser(User* usr);
+User* userInit(char* username, char* password);
 
 
 

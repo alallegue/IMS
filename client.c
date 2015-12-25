@@ -5,41 +5,46 @@
 
 char *username, *password;
 
-/* nueva versión*/ 
-
-int login(struct soap soap,char *serverURL){
-	char* nick,*pass;
+/* FIN */
+/* Pedir al servidor iniciar sesion con un usuario existente */
+int login(struct soap soap, char *serverURL){
+	char* un;
+	char* pass;
 	int res = 1;
-
-	nick = (char*)malloc(256*sizeof(char));
+	
+	un = (char*)malloc(256*sizeof(char));
 	pass = (char*)malloc(256*sizeof(char));
+	
+	if(!DEBUG_MODE) system("clear");
+	printf("Acceder a una cuenta ya existente\n");
+	printf("	Introduce nombre de usuario: ");
+	scanf("%s", un);
+	printf("	Introduce contraseña: ");
+	scanf("%s", pass);
 
-	//user* usr;
+	soap_call_ims__login(&soap, serverURL, "", un, pass, &res);
 
-	printf("\nNombre\n");
-	scanf("%s",nick);
-	printf("Contraseña\n");
-	scanf("%s",pass);
-
-	//soap_call_ims__login(&soap, serverURL, "",nick,pass,&res);
-
-	if(res == -1){
-		printf("Nombre de usuario o contraseña incorrectos\n");
-		free(nick);
-		free(pass);
+	switch(res) {
+		case -1:
+			printf("Nombre de usuario o contraseña incorrectos\n");
+			free(un);
+			free(pass);
+			break;
+		case 1:
+			printf("No hay conexion con el servidor\n");
+			break;
+		default:
+			username = un;
+			password = pass;
+			printf("Logueado correctamente como %s\n", username);
+			break;
 	}
-	else if (res == 1){
-		printf("Hay un problema con la conexion\n");
-	}
-	else{
-		username = nick;
-		password = pass;
-	}
-	//free(pass);
-
+	
 	return res;
 }
 
+/* FIN */
+/* Pedir al servidor registrar un nuevo usuario */ 
 int registerUser(struct soap soap,char *serverURL) {
 	char* un;
 	char* pass;
@@ -48,19 +53,31 @@ int registerUser(struct soap soap,char *serverURL) {
 	un = (char*)malloc(256*sizeof(char));
 	pass = (char*)malloc(256*sizeof(char));
 	
-	printf("Introduce nombre de usario: ");
+	printf("Introduce nombre de usuario: ");
 	scanf("%s", un);
 	printf("Introduce contraseña: ");
 	scanf("%s", pass);
 	
-	//Gestión de errores
-	
 	soap_call_ims__registerUser(&soap, serverURL, "", un, pass, &res);
 	
-	//Gestión de errores
+	switch(res) {
+		case 0:
+			printf("Usuario registrado correctamente. Selecciona login para acceder a tu cuenta\n");
+			break;
+		case -1:
+			printf("Se ha alcanzado el limite de usuarios. No puede registrarse\n");
+			break;
+		case -2:
+			printf("Ya existe un usuario con el mismo nombre\n");
+			break;
+		default:
+			printf("No hay conexion con el servidor\n");
+			break;
+	}
+	free(un);
+	free(pass);
 	
 	return 0;
-	
 }
 
 int sendMessage(struct soap soap, char *serverURL) {
@@ -112,7 +129,7 @@ int sendMessage(struct soap soap, char *serverURL) {
 }
 
 
-/*Menú de bienvenida. 
+/* Menú de bienvenida. 
  * Es el primero que se muestra y solicita
  * al usuario crear una cuenta o iniciar con una ya creada*/
 int show_login(struct soap soap, char *serverURL) {
@@ -120,7 +137,7 @@ int show_login(struct soap soap, char *serverURL) {
 	int res = -1;
 	
 	while(op != 0 && res != 0){
-		//system("clear");
+		if(!DEBUG_MODE) system("clear");
 		printf("	Bienvenido. Selecciona una opcion: \n");
 		printf("	1) Entrar.\n");
 		printf("	2) Registrarse.\n");
@@ -130,9 +147,9 @@ int show_login(struct soap soap, char *serverURL) {
 		switch(op) {
 			case 1: //Login
 				res = login(soap, serverURL);
-				if(res == 0){ //Si se loguea correctamente entrar al menú principal
+				//Si se loguea correctamente entrar al menú principal
+				if(res == 0) 
 					show_menu(soap, serverURL);
-				}
 				res = 1;
 				op = -1;
 				break;
@@ -159,8 +176,9 @@ int show_menu(struct soap soap, char *serverURL) {
 	int q = 0, error;
 	while(!q) {
 		int in;
-		printf("	Elige una opcion:\n");
-		printf("	1) Enviar mensaje a usuario\n");
+		if(!DEBUG_MODE) system("clear");
+		printf("	Hola, %s. Selecciona una opcion:\n", username);
+		printf("	1) Enviar mensaje a otro usuario\n");
 		printf("	2) Mostrar nuevos mensajes entrantes\n");
 		printf("	3) Listar usuarios amigos\n");
 		printf("	4) Enviar solicitud de amistad\n");
@@ -196,6 +214,7 @@ int show_menu(struct soap soap, char *serverURL) {
 	return 0;
 }
 
+/* FIN */
 int main(int argc, char **argv){
 	struct soap soap;
 	char *serverURL;
@@ -210,10 +229,6 @@ int main(int argc, char **argv){
 	soap_init(&soap);
 	// Obtain server address
 	serverURL = argv[1];
-	// Debug?
-	if (DEBUG_MODE){
-		printf ("Server to be used by client: %s\n", serverURL);
-	}
 	
 	//Mostrar menú de bienvenida
 	show_login(soap, serverURL);
