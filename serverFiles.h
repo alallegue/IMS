@@ -26,6 +26,6 @@ User *userlist[MAX_USERS];
 int serverInit();
 int addUser(char* username, char* password);
 int login(char* username, char* password);
-
+int deleteUser(char* username);
 
 #endif

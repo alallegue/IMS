@@ -32,6 +32,7 @@ typedef struct {
 
 
 User* userInit(char* username, char* password);
+int userFree(User* user);
 
 
 

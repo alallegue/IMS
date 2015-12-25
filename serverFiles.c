@@ -209,15 +209,15 @@ int login(char* username, char* password) {
 	int found = 0;
 	int i = 0;
 	User *user = NULL;
-	while(i < numUsers && found == 0){
-		if(strcmp(username, userlist[i]->username) == 0){
+	while(i < numUsers && found == 0) {
+		if(strcmp(username, userlist[i]->username) == 0) {
 			found = 1;
 			user = userlist[i];
 		}
 		i++;
 	}
 	// Si el usuario existe y las contraseñas coinciden, loguear al usuario
-	if(found == 1 && strcmp(password, user->password) == 0){
+	if(found == 1 && strcmp(password, user->password) == 0) {
 		user->online = 1;
 		printf("Usuario %s logueado correctamente\n", username);
 		return 0;
@@ -227,3 +227,48 @@ int login(char* username, char* password) {
 	return -1;
 }
 
+int deleteUser(char* username) {
+	int found = 0;
+	int i;
+	User *user;
+	// Eliminar usuario en memoria
+	for(i = 0; i < numUsers; i++){
+		if(found == 0) {
+			if(strcmp(username, userlist[i]->username) == 0) {
+				found = 1;
+				user = userlist[i];
+				userlist[i] = userlist[i+1]; //No deberia petar?
+			}
+		}
+		else {
+			userlist[i] = userlist[i+1]; //No deberia petar?
+		}
+	}
+	userFree(user);
+	numUsers--;
+	printf("Usuario %s eliminado de memoria\n", username);
+	
+	//Borrar el usuario de las listas de amigos
+	/* AMIGOS SIN HACER
+	User *friend;
+	for(i = 0; i < MAXUSER; i++){
+		friend = userlist[i];
+		if(friend != NULL){
+			if(DEBUG_MODE) printf("removeUser ->%s le borra de amigos\n",friend->nick);
+			removeFriend(friend,nick);
+			if(DEBUG_MODE) printf("removeUser ->%s le borra de pendientes\n",friend->nick);
+			removeFriendRequestPending(friend,nick);
+			if(DEBUG_MODE) printf("removeUser ->%s le borra de enviados\n",friend->nick);
+			removeFriendRequestSend(friend,nick);
+		}
+	}
+	*/
+	
+	// Eliminar directorio de usuario
+	char path[50];
+	sprintf(path, "rm -R %s%s", DATA_PATH, username);
+	system(path);
+	printf("Directorio %s eliminado\n", username);
+	
+	return 0;
+}

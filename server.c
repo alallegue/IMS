@@ -94,3 +94,7 @@ int ims__login(struct soap *soap, char* username, char* password, int *error) {
 	return SOAP_OK;
 }
 
+int ims__deleteUser(struct soap *soap, char* username, int *error) {
+	*error = deleteUser(username);	
+	return SOAP_OK;
+}

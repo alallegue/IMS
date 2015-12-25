@@ -16,5 +16,6 @@ struct Message{
 int ims__sendMessage (struct Message myMessage, int *result);
 int ims__receiveMessage (struct Message *myMessage);
 
-int ims__registerUser(char* username, char* password, int *error);
 int ims__login(char* username, char* password, int *error);
+int ims__registerUser(char* username, char* password, int *error);
+int ims__deleteUser(char* username, int *error);

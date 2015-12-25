@@ -27,3 +27,8 @@ User* userInit(char* username,char* password){
 
 	return user;
 }
+
+int userFree(User* user) {
+	
+	return 0;
+}

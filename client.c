@@ -45,7 +45,7 @@ int login(struct soap soap, char *serverURL){
 
 /* FIN */
 /* Pedir al servidor registrar un nuevo usuario */ 
-int registerUser(struct soap soap,char *serverURL) {
+int registerUser(struct soap soap, char *serverURL) {
 	char* un;
 	char* pass;
 	int res = 1;
@@ -77,6 +77,25 @@ int registerUser(struct soap soap,char *serverURL) {
 	free(un);
 	free(pass);
 	
+	return 0;
+}
+/* FIN */
+/* Baja de usuario. Pedir al servidor eliminar el usuario logueado */
+int deleteUser(struct soap soap, char *serverURL){
+	char conf;
+	int error = 1;
+	printf("¿Seguro que quieres darte de baja? Perderas todos los mensajes y amigos guardados (s/n)\n");
+	scanf(" %c", &conf);
+	if(conf == 's'){
+		soap_call_ims__deleteUser(&soap, serverURL, "", username, &error);
+		if(error == 0) {
+			printf("Te has dado de baja\n");
+			free(username);
+			free(password);
+			return 1;
+		}
+		else printf("No hay conexion con el servidor\n");
+	}
 	return 0;
 }
 
@@ -183,7 +202,7 @@ int show_menu(struct soap soap, char *serverURL) {
 		printf("	3) Listar usuarios amigos\n");
 		printf("	4) Enviar solicitud de amistad\n");
 		printf("	5) Ver solicitudes de amistad\n");
-		printf("	4) Dar de baja\n");
+		printf("	6) Dar de baja\n");
 		printf("	0) Salir\n");
 		scanf("%d", &in);
 		
@@ -203,10 +222,14 @@ int show_menu(struct soap soap, char *serverURL) {
 			case 5: 
 
 				break;
+			case 6: //Baja
+				q = deleteUser(soap, serverURL);
+				break;
 			case 0: //Salir
 				q = 1;
 				break;
 			default:
+				printf("Opcion no valida, vuelve a intentarlo\n");
 				break;
 		}
 	}
