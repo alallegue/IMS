@@ -261,11 +261,11 @@ int deleteUser(char* username) {
 			if(strcmp(username, userlist[i]->username) == 0) {
 				found = 1;
 				user = userlist[i];
-				userlist[i] = userlist[i+1]; //No deberia petar?
+				userlist[i] = userlist[i+1];
 			}
 		}
 		else {
-			userlist[i] = userlist[i+1]; //No deberia petar?
+			userlist[i] = userlist[i+1];
 		}
 	}
 	userFree(user);
@@ -322,60 +322,59 @@ int makeReq(char* username, char* friendname){
 	User *usr = getUser(username);
 	User *friend = getUser(friendname);
 
-	printf("nombre: %s, amigo:%s\n",usr->username,friend->username );
-	if(usr->numFriends == MAXFRIENDS){
+	// Comprobar que hay hueco para nuevos amigos
+	if(usr->numFriends == MAXFRIENDS)
 		return -5;
-	}
-	printf("logged:%d\n",usr->logged);
+	// Comprobar que el amigo existe	
 	if(friend == NULL)
-	{
 		return -3;
-	}
-	else if(usr->logged == 1)
-	{
-		if(friend->numFriends == MAXFRIENDS){
-			return -6;
-		}
-		if(alreadyFriend(usr,friendname)==1)
-			return -4;
-		}
-		if(deliverReqfriend(usr,friendname)==0)		{
-			FILE *file;
-			//char* path = (char*)malloc(sizeof(char*));
-			char path[100];
-			sprintf(path,"%s%s/enviados",DATA_PATH,username);
+	//else if(usr->logged == 1) {
+	
+	// Comprobar que el amigo tiene hueco en la lista de amigos
+	if(friend->numFriends == MAXFRIENDS)
+		return -6;
+	// Comprobar que el amigo no este en la lista de amigos	
+	if(alreadyFriend(usr,friendname) == 1)
+		return -4;
+	// Insertar amigo en la lista de pendientes	
+	if(deliverReqfriend(usr,friendname) == 0) {
+		FILE *file;
+		//char* path = (char*)malloc(sizeof(char*));
+		char path[100];
+		sprintf(path,"%s%s/enviados",DATA_PATH,username);
+
+		//if(DEBUG_MODE) printf("ims__sendFriendshipRequiest -> Path: %s\n",path);
+
+		if((file = fopen(path, "a")) == NULL)
+			perror("El fichero no existe");
+
+		fprintf(file,"%s\n",friendname);
+
+		if(fclose(file) == -1)
+			perror("El fichero no existe");
+		//free(path);
+
+		if(deliverReqPending(usr,friendname) == 0)
+		{
+			//path = (char*)malloc(sizeof(char*));
+			sprintf(path,"%s%s/pendientes",DATA_PATH,friendname);
 
 			if(DEBUG_MODE) printf("ims__sendFriendshipRequiest -> Path: %s\n",path);
 
 			if((file = fopen(path, "a")) == NULL)
 				perror("El fichero no existe");
 
-			fprintf(file,"%s\n",friendname);
+			fprintf(file,"%s\n",username);
 
 			if(fclose(file) == -1)
 				perror("El fichero no existe");
-			//free(path);
 
-			if(deliverReqPending(usr,friendname) == 0)
-			{
-				//path = (char*)malloc(sizeof(char*));
-				sprintf(path,"%s%s/pendientes",DATA_PATH,friendname);
+			if(DEBUG_MODE && friend != NULL) printf("ims__sendFriendshipRequiest -> %s envia peticion de amistad a %s\n",usr->username,friend->username);
+		}
+	else 
+		return -3; // El amigo ya estaba en la lista de enviados
 
-				if(DEBUG_MODE) printf("ims__sendFriendshipRequiest -> Path: %s\n",path);
-
-				if((file = fopen(path, "a")) == NULL)
-					perror("El fichero no existe");
-
-				fprintf(file,"%s\n",username);
-
-				if(fclose(file) == -1)
-					perror("El fichero no existe");
-
-				if(DEBUG_MODE && friend != NULL) printf("ims__sendFriendshipRequiest -> %s envia peticion de amistad a %s\n",usr->username,friend->username);
-			}
-
-	}else
-	{
-		return -2;
-	}
+	//}
+	
+	return 0;
 }

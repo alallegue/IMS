@@ -163,6 +163,36 @@ int sendMessage(struct soap soap, char *serverURL) {
 	return 0;
 }
 
+/*  */
+int sendReq(struct soap soap, char *serverURL){
+	int error;
+	char* friendname=(char*)malloc(256*sizeof(char));
+	printf("Introduce el nombre de usuario a agregar: \n");
+	scanf("%s",friendname);
+	soap_call_ims__sendReq(&soap, serverURL, "", username, friendname, &error);
+	printf("error: %d\n", error);
+	switch(error) {
+		case 0:
+			printf("Solicitud enviada\n");
+		case -5:
+			printf("Has alcanzado el limite de amigos\n");
+			break;
+		case -3:
+			printf("Usuario no valido\n");
+			break;
+		case -4: 
+			printf("Ese usuario ya es tu amigo\n");
+		case 1:
+			printf("No hay conexion con el servidor\n");
+			break;
+		case -6:
+			printf("El otro usuario ha alcanzado el limite de amigos\n");
+		default:
+			break;
+	}
+	free (friendname);
+	return 1;
+}
 
 /* Menú de bienvenida. 
  * Es el primero que se muestra y solicita
@@ -203,17 +233,7 @@ int show_login(struct soap soap, char *serverURL) {
 
 	return res;
 }
-int sendReq(struct soap soap, char *serverURL){
-	int error;
-	char* friendname=(char*)malloc(256*sizeof(char));
-	scanf("%s",friendname);
-	printf("T1");
-	sleep(1);
-	soap_call_ims__sendReq(&soap, serverURL, "", username, friendname, &error);
-	printf("error: %d\n", error);
-	free (friendname);
-	return 1;
-}
+
 /* Muestra el menú principal donde el usuario puede interactuar
  * con todas las funciones de la aplicación
 */
@@ -242,8 +262,8 @@ int show_menu(struct soap soap, char *serverURL) {
 			case 3: //Listar amigos
 				
 				break;
-			case 4:
-				error=sendReq(soap, serverURL);
+			case 4: //Solicitud de amistad
+				error = sendReq(soap, serverURL);
 				break;
 			case 5: 
 

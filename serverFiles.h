@@ -28,5 +28,7 @@ int addUser(char* username, char* password);
 int login(char* username, char* password);
 int deleteUser(char* username);
 int logout(char* username);
+int makeReq(char* username, char* friendname);
+User* getUser(char* username);
 
 #endif

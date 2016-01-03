@@ -28,16 +28,19 @@ User* userInit(char* username,char* password){
 	return user;
 }
 
+/* SIN HACER */
 int userFree(User* user) {
 	
 	return 0;
 }
 
+/* FIN */
+/* Comprueba si el usuario ya tiene al amigo agregado en la lista de amigos */
 int alreadyFriend(User* usr,char *friendname){
 	int found = 0;
 	int i = 0;
 	char* aux;
-
+	
 	while(found == 0 && i < MAXFRIENDS){
 		if(usr->friends[i] != NULL){
 			aux = usr->friends[i];
@@ -50,27 +53,30 @@ int alreadyFriend(User* usr,char *friendname){
 	return found;
 }
 
+/* Guarda en memoria, en la lista de solicitudes enviadas a un amigo */
 int deliverReqfriend(User* usr,char* friendname){
 	int i = 0;
 	int j = -1;
 	int found = 0;
-
-	if(strcmp(usr->username,friendname) == 0) return -1;
+	
+	// Comprobar que el usuario no se quiera añadir a si mismo
+	if(strcmp(usr->username,friendname) == 0) 
+		return -1;
 	char* aux;
-	while( i < MAXFRIENDS && found == 0)
-	{
+	// Comprobar que el amigo no esté ya guardado en la lista de enviados
+	while(i < MAXFRIENDS && found == 0){
 		aux = usr->friends_request_send[i];
-		if(aux != NULL)
-		{
+		if(aux != NULL) {
 			if(strcmp(aux,friendname) == 0){
 				found = 1;
 			}
-		}else if(j == -1)
-		{
+		}
+		else if(j == -1) {
 			j = i;
 		}
 		i++;
 	}
+	// Guardar el amigo en la lista de enviados
 	if(found == 0){
 		usr->friends_request_send[j] = (char*)malloc(256*sizeof(char));
 		strcpy(usr->friends_request_send[j] , friendname);
@@ -80,8 +86,7 @@ int deliverReqfriend(User* usr,char* friendname){
 	return found;
 }
 
-int deliverReqPending(User* usr,char* friendname)
-{
+int deliverReqPending(User* usr,char* friendname) {
 	int i = 0;
 	int j = -1;
 	int found = 0;
