@@ -203,7 +203,17 @@ int show_login(struct soap soap, char *serverURL) {
 
 	return res;
 }
-
+int sendReq(struct soap soap, char *serverURL){
+	int error;
+	char* friendname=(char*)malloc(256*sizeof(char));
+	scanf("%s",friendname);
+	printf("T1");
+	sleep(1);
+	soap_call_ims__sendReq(&soap, serverURL, "", username, friendname, &error);
+	printf("error: %d\n", error);
+	free (friendname);
+	return 1;
+}
 /* Muestra el menú principal donde el usuario puede interactuar
  * con todas las funciones de la aplicación
 */
@@ -233,7 +243,7 @@ int show_menu(struct soap soap, char *serverURL) {
 				
 				break;
 			case 4:
-
+				error=sendReq(soap, serverURL);
 				break;
 			case 5: 
 
@@ -252,6 +262,7 @@ int show_menu(struct soap soap, char *serverURL) {
 	
 	return 0;
 }
+
 
 /* FIN */
 int main(int argc, char **argv){

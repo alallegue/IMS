@@ -18,15 +18,15 @@ typedef struct {
 	char* password;
 	int logged;
 
-	//int numFriends;
-	//int numSend;
-	//int numPending;
+	int numFriends;
+	int numSend;
+	int numPending;
 
 	//struct Files *files[MAXFRIENDS];
 
-	//char* friends[MAXFRIENDS];//friends who accepted your friendship request
-	//char* friends_request_send[MAXFRIENDS];//friends that you've sent friendship request
-	//char* friends_request_pending[MAXFRIENDS];//friends who have sent friendship request to you
+	char* friends[MAXFRIENDS];//friends who accepted your friendship request
+	char* friends_request_send[MAXFRIENDS];//friends that you've sent friendship request
+	char* friends_request_pending[MAXFRIENDS];//friends who have sent friendship request to you
 
 }User;
 
@@ -34,6 +34,8 @@ typedef struct {
 User* userInit(char* username, char* password);
 int userFree(User* user);
 
-
+int alreadyFriend(User* usr,char *friendname);
+int deliverReqfriend(User* usr,char* friendname);
+int deliverReqPending(User* usr,char* friendname);
 
 #endif

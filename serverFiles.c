@@ -74,6 +74,7 @@ int serverInit() {
 					if(DEBUG_MODE) printf("serverInit -> Send: %s\n",name);
 					user = userlist[num_user-1];// Coger el usuario actual
 					//addFriendRequestSend(user,name); SIN HACER
+					printf("user: %s", user->username);
 				}
 			}
 
@@ -94,6 +95,7 @@ int serverInit() {
 					name[strlen(name)-1] = '\0';
 					if(DEBUG_MODE) printf("serverInit -> Pending: %s\n",name);
 					user = userlist[num_user-1];// Coger el usuario actual
+					printf("user: %s", user->username);
 					//addFriendRequestPending(user,name); SIN HACER
 				}
 			}
@@ -153,6 +155,26 @@ int serverInit() {
 
 	return 0;
 	
+}
+
+User* getUser(char* username){
+	int found = 0;
+	int i = 0;
+	User *usr = NULL;
+	printf("numero:%d\n",numUsers);
+	while(i < numUsers && found == 0){
+		printf("i:%d\n",i);
+		printf("nombre: %s\n",userlist[i]->username);
+		if(strcmp(username,userlist[i]->username) == 0){
+			found = 1;
+			usr = userlist[i];
+			//printf("nombre: %s, amigo",usr->username);
+		}
+		i++;
+
+	}
+	printf("sale: %s\n",usr->username);
+	return usr;
 }
 
 /* FIN */
@@ -251,9 +273,9 @@ int deleteUser(char* username) {
 	printf("Usuario %s eliminado de memoria\n", username);
 	
 	//Borrar el usuario de las listas de amigos
-	/* AMIGOS SIN HACER
+	//AMIGOS SIN HACER
 	User *friend;
-	for(i = 0; i < MAXUSER; i++){
+	/*for(i = 0; i < MAX_USERS; i++){
 		friend = userlist[i];
 		if(friend != NULL){
 			if(DEBUG_MODE) printf("removeUser ->%s le borra de amigos\n",friend->nick);
@@ -263,8 +285,7 @@ int deleteUser(char* username) {
 			if(DEBUG_MODE) printf("removeUser ->%s le borra de enviados\n",friend->nick);
 			removeFriendRequestSend(friend,nick);
 		}
-	}
-	*/
+	}*/
 	
 	// Eliminar directorio de usuario
 	char path[50];
@@ -295,4 +316,66 @@ int logout(char* username){
 	printf("Usuario %s desconectado\n", username);
 	
 	return 0;
+}
+
+int makeReq(char* username, char* friendname){
+	User *usr = getUser(username);
+	User *friend = getUser(friendname);
+
+	printf("nombre: %s, amigo:%s\n",usr->username,friend->username );
+	if(usr->numFriends == MAXFRIENDS){
+		return -5;
+	}
+	printf("logged:%d\n",usr->logged);
+	if(friend == NULL)
+	{
+		return -3;
+	}
+	else if(usr->logged == 1)
+	{
+		if(friend->numFriends == MAXFRIENDS){
+			return -6;
+		}
+		if(alreadyFriend(usr,friendname)==1)
+			return -4;
+		}
+		if(deliverReqfriend(usr,friendname)==0)		{
+			FILE *file;
+			//char* path = (char*)malloc(sizeof(char*));
+			char path[100];
+			sprintf(path,"%s%s/enviados",DATA_PATH,username);
+
+			if(DEBUG_MODE) printf("ims__sendFriendshipRequiest -> Path: %s\n",path);
+
+			if((file = fopen(path, "a")) == NULL)
+				perror("El fichero no existe");
+
+			fprintf(file,"%s\n",friendname);
+
+			if(fclose(file) == -1)
+				perror("El fichero no existe");
+			//free(path);
+
+			if(deliverReqPending(usr,friendname) == 0)
+			{
+				//path = (char*)malloc(sizeof(char*));
+				sprintf(path,"%s%s/pendientes",DATA_PATH,friendname);
+
+				if(DEBUG_MODE) printf("ims__sendFriendshipRequiest -> Path: %s\n",path);
+
+				if((file = fopen(path, "a")) == NULL)
+					perror("El fichero no existe");
+
+				fprintf(file,"%s\n",username);
+
+				if(fclose(file) == -1)
+					perror("El fichero no existe");
+
+				if(DEBUG_MODE && friend != NULL) printf("ims__sendFriendshipRequiest -> %s envia peticion de amistad a %s\n",usr->username,friend->username);
+			}
+
+	}else
+	{
+		return -2;
+	}
 }
