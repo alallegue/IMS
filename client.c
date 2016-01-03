@@ -12,6 +12,7 @@ int login(struct soap soap, char *serverURL){
 	char* pass;
 	int res = 1;
 	
+	
 	un = (char*)malloc(256*sizeof(char));
 	pass = (char*)malloc(256*sizeof(char));
 	
