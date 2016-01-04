@@ -7,7 +7,6 @@
 #define MAXFRIENDS 100
 
 
-
 struct Files{
 	FILE *file;
 	char *friend_nick;
@@ -37,5 +36,7 @@ int userFree(User* user);
 int alreadyFriend(User* usr,char *friendname);
 int deliverReqfriend(User* usr,char* friendname);
 int deliverReqPending(User* usr,char* friendname);
+int addFriend(User* usr,char* friendname);
+
 
 #endif
