@@ -21,3 +21,4 @@ int ims__registerUser(char* username, char* password, int *error);
 int ims__deleteUser(char* username, int *error);
 int ims__logout(char* username, int *error);
 
+int ims__sendReq(char* username, char* friendname, int *error);

@@ -104,3 +104,7 @@ int ims__logout(struct soap * soap, char* username, int *error) {
 	return SOAP_OK;
 }
 
+int ims__sendReq(struct soap* soap, char* username, char* friendname, int *error){
+	*error= makeReq(username,friendname);
+	return SOAP_OK;
+}
