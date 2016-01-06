@@ -5,6 +5,8 @@
 
 char *username, *password;
 
+
+
 /* FIN */
 /* Pedir al servidor iniciar sesion con un usuario existente */
 int login(struct soap soap, char *serverURL){
