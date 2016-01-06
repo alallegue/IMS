@@ -31,4 +31,6 @@ int logout(char* username);
 int makeReq(char* username, char* friendname);
 User* getUser(char* username);
 
+int copyToFile(FILE* file, char* friends[MAXFRIENDS], int num);
+
 #endif

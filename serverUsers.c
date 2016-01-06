@@ -118,34 +118,127 @@ int deliverReqPending(User* usr,char* friendname) {
 
 /* FIN */
 /* Añade un usuario a la lista de amigos aceptados */
-int addFriend(User* usr,char* friendname){
+int addFriend(User* user,char* friendname){
 	int i = 0;
 	int j = -1;
 	int found = 0;
-/*
-	if(strcmp(usr->nick,friend_nick) == 0){
-		return -1;
+
+	// Un usuario no puede agregarse a si mismo
+	if(strcmp(user->username, friendname) == 0){
+		return -1; 
 	}
 
+	// Comprobar que el amigo no estaba agregado
 	char* aux;
 	while( i < MAXFRIENDS && found == 0){
-		aux = usr->friends[i];
+		aux = user->friends[i];
 		if(aux != NULL){
-			if(strcasecmp(aux,friend_nick) == 0){
+			if(strcasecmp(aux,friendname) == 0){
 				found = 1;
 			}
-		}
+		} // Revisar
 		else if(j == -1){
 				j = i;
 		}
 		i++;
 	}
 	if(found == 0){
-		usr->friends[j] = (char*)malloc(256*sizeof(char));
-		strcpy(usr->friends[j] , friend_nick);
-		usr->numFriends++;
+		user->friends[j] = (char*)malloc(256*sizeof(char));
+		strcpy(user->friends[j] , friendname);
+		user->numFriends++;
 		//printf("%s\n",usr->friends[j]);
+		printf("%s y %s son amigos\n", user->username, user->friends[j]);
 	}
-*/
+
 	return found;
 }
+
+/* FIN */
+/* Elimina un usuario de la lista de solicitudes enviadas y 
+ * actualiza el fichero correspondiente */
+int deleteReqFriend(User* user,char* friendname) {
+	int i = 0;
+	int found = 0;
+	char* aux;
+	// Buscar la posicion del amigo en la lista de solicitudes enviadas
+	while(i < MAXFRIENDS && found == 0){
+		aux = user->friends_request_send[i];
+		if(aux != NULL){
+			if(strcmp(aux, friendname) == 0){
+				found = 1;
+			}
+		}
+		if(found == 0)
+			i++;
+	}
+	if(found == 1){
+		// Eliminar la solicitud de memoria
+		free(user->friends_request_send[i]);
+		user->friends_request_send[i] = NULL;
+		user->numSend--;
+		
+		// Actualizar el fichero de solicitudes enviadas
+		char* path = (char*)malloc(256*sizeof(char));
+		sprintf(path,"%s%s%s/%s","rm ",DATA_PATH,user->username,"enviados");
+		if(DEBUG_MODE) printf("removeFriendshipRequestSend -> Borrando fichero enviados path: %s\n",path);
+		system(path);
+		sprintf(path,"%s%s/%s",DATA_PATH,user->username,"enviados");
+		FILE* file;
+		if(DEBUG_MODE) printf("removeFriendshipRequestSend -> Rescribiendo fichero enviados path: %s\n",path);
+
+		if((file = fopen(path, "w")) == NULL) perror("Error abriendo fichero");
+
+		copyToFile(file,user->friends_request_send,user->numSend);
+
+		if(fclose(file) == -1) perror("Error cerrando fichero");
+		free(path);
+	}
+	return found;
+}
+
+/* FIN */
+/* Elimina un usuario de la lista de solicitudes pendientes 
+ * y actualiza el fichero correspondiente */
+int deleteReqPending(User* user,char* friendname) {
+	int i = 0;
+	int found = 0;
+	char* aux;
+	// Buscar la posicion del amigo en la lista de solicitudes pendientes
+	while(i < MAXFRIENDS && found == 0){
+		aux = user->friends_request_pending[i];
+		if(aux != NULL){
+			if(strcmp(aux,friendname) == 0){
+				found = 1;
+			}
+		}
+		if(found == 0)
+			i++;
+	}
+	if(found == 1){
+		// Eliminar la solicitud en memoria
+		free(user->friends_request_pending[i]);
+		user->friends_request_pending[i] = NULL;
+		user->numPending--;
+		
+		// Actualizar el fichero de solicitudes pendientes
+		char* path = (char*)malloc(256*sizeof(char));
+		sprintf(path,"%s%s%s/%s","rm ",DATA_PATH,user->username,"pendientes");
+		if(DEBUG_MODE) printf("removeFriendshipRequestSend -> Borrando fichero pendientes path: %s\n",path);
+		FILE* file;
+
+		sprintf(path,"%s%s/%s",DATA_PATH,user->username,"pendientes");
+		if(DEBUG_MODE) printf("removeFriendshipRequestSend -> Rescribiendo fichero pendientes path: %s\n",path);
+
+		if((file = fopen(path, "w")) == NULL) perror("Error abriendo fichero");
+
+		copyToFile(file,user->friends_request_pending,user->numPending);
+
+		if(fclose(file) == -1) perror("Error cerrando fichero");
+
+		system(path);
+		free(path);
+	}
+	return found;
+}
+
+
