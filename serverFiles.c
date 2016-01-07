@@ -202,29 +202,31 @@ int addUser(char* username, char* password) {
 	printf("Usuario %s insertado en memoria\n", userlist[numUsers-1]->username);
 	printf("Numero de usuarios en memoria: %d\n", numUsers);
 	
-	char path[50];
-	// Crear el directorio del usuario
-	sprintf(path, "%s%s", DATA_PATH, username);
-	mkdir(path, 0777);
-	printf("Directorio creado: %s\n",path);
-	// Crear el fichero de mensajes enviados
-	sprintf(path,"%s%s/%s", DATA_PATH,username,"enviados");
-	creat(path, 0777);
-	printf("Fichero creado: %s\n", path);
-	// Crear el fichero de mensajes pendientes
-	sprintf(path,"%s%s/%s",DATA_PATH,username,"pendientes");
-	creat(path, 0777);
-	printf("Fichero creado: %s\n", path);
-	// Crear el fichero con la contraseña del usuario y almacenarla
-	sprintf(path,"%s%s/%s",DATA_PATH,username,"password");
-	FILE *file ;
-	file= fopen(path,"w+");
-	fprintf(file,"%s",password);
-	printf("Fichero creado: %s\n", path);
-	fclose(file);
+	char path[100];
+	sprintf(path,"%s%s%s","mkdir ",DATA_PATH,username);
+	if(DEBUG_MODE) printf("ims__addUser -> Path: %s\n",path);
+	system(path);
 
-	printf("Añadido usuario: %s con contraseña: %s al servidor\n", username, password);
-	
+	sprintf(path,"%s%s%s/%s","touch ",DATA_PATH,username,"enviados");
+	if(DEBUG_MODE) printf("ims__addUser -> Path: %s\n",path);
+	system(path);
+
+	sprintf(path,"%s%s%s/%s","touch ",DATA_PATH,username,"pendientes");
+	if(DEBUG_MODE) printf("ims__addUser -> Path: %s\n",path);
+	system(path);
+
+	sprintf(path,"%s/%s/%s",DATA_PATH,username,"password");
+	FILE *file ;
+	if((file= fopen(path,"w+")) == NULL){
+		perror("Error creando fichero de usuario");
+	}
+	if(DEBUG_MODE) printf("ims__addUser -> Path: %s\n",path);
+	fprintf(file,"%s",password);
+	if(fclose(file) == -1){
+		perror("Error cerrando fichero de usuario");
+	}
+		printf("Añadido usuario: %s con contraseña: %s al servidor\n", username, password);
+
 	return 0;
 }
 
@@ -379,4 +381,82 @@ int makeReq(char* username, char* friendname){
 	//}
 	
 	return 0;
+}
+/*int getReqslist(User* usr,char** friendlist)
+{
+	char* aux;
+	int i = 0;
+	int j = 0;
+
+	//while(i < MAXFRIENDS)
+	//{
+		aux = usr->friends_request_pending[0];
+		printf("value: %s", aux);
+	// if(aux != NULL)
+	//	{
+	//	printf("value: %s", aux);
+	//		friendlist[j]=(char*)malloc(256*sizeof(char));
+	//		strcpy(friendlist[j], aux);
+	//		++j;
+	//	}
+		//i++;
+	//}
+	return j;
+}
+*/
+/*int listReqs(char* username ,cString* fl){
+	User *usr = getUser(username);
+//	return 0;
+	int nReqs;
+//	if(usr->logged == 1)
+//	{
+		nReqs=getReqslist(usr,fl);
+		return 0;
+	//	printf("%s\n", fl[0]);
+		//printf("%s\n",friends->data[0]);
+		if(DEBUG_MODE)
+			printf("ims__getFriendshipRequiests -> %s quiere su lista de peticiones pendientes\n",usr->username);
+//	}
+	return nReqs;
+}
+*/
+
+int getFriendRequestsPending(User* usr,char* friends[MAX_FRIENDS])
+{
+	if(usr->numPending > 0)
+	{
+		char* aux;
+		int i;
+
+		for(i = 0; i < MAX_FRIENDS; i++)
+		{
+			aux = usr->friends_request_pending[i];
+
+			if(aux != NULL)
+			{
+				friends[i] = (char*)malloc(256*sizeof(char));
+				strcpy(friends[i],aux);
+			}
+		}
+	}
+	return 0;
+}
+
+int haveReqs(char* user){
+	User *usr = getUser(user);
+	printf("peta aqui");
+	if(usr->logged == 1)
+		return usr->numPending;
+	return -1;
+}
+
+int getReqs(char* user, struct Char_vector *friends){
+
+	User *usr = getUser(user);
+	if(usr->logged == 1)
+	{
+		getFriendRequestsPending(usr,friends->data);
+		if(DEBUG_MODE)
+			printf("ims__getFriendshipRequiests -> %s quiere su lista de peticiones pendientes\n",usr->username);
+	}
 }
