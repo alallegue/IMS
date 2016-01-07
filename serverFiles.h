@@ -30,7 +30,8 @@ int deleteUser(char* username);
 int logout(char* username);
 int makeReq(char* username, char* friendname);
 User* getUser(char* username);
-
+int haveReqs(char* user);
+int getReqs(char* user,struct Char_vector *friends);
 int copyToFile(FILE* file, char* friends[MAXFRIENDS], int num);
 
 #endif
