@@ -167,38 +167,22 @@ int addUser(char* username, char* password) {
 	printf("Usuario %s insertado en memoria\n", userlist[numUsers-1]->username);
 	printf("Numero de usuarios en memoria: %d\n", numUsers);
 	
-<<<<<<< HEAD
 	char path[100];
-	sprintf(path,"%s%s%s","mkdir ",DATA_PATH,username);
-	if(DEBUG_MODE) printf("ims__addUser -> Path: %s\n",path);
-	system(path);
-
-	sprintf(path,"%s%s%s/%s","touch ",DATA_PATH,username,"enviados");
-	if(DEBUG_MODE) printf("ims__addUser -> Path: %s\n",path);
-	system(path);
-
-	sprintf(path,"%s%s%s/%s","touch ",DATA_PATH,username,"pendientes");
-	if(DEBUG_MODE) printf("ims__addUser -> Path: %s\n",path);
-	system(path);
-
-	sprintf(path,"%s/%s/%s",DATA_PATH,username,"password");
-=======
-	char path[50];
 	// Crear el directorio del usuario
-	sprintf(path, "%s%s", DATA_PATH, username);
-	mkdir(path, 0777);
+	sprintf(path,"%s%s%s","mkdir ",DATA_PATH,username);
+	system(path);
 	printf("Directorio creado: %s\n",path);
 	// Crear el fichero de solicitudes enviadas
 	sprintf(path,"%s%s%s/%s","touch ",DATA_PATH,username,"enviados");
-	printf("Fichero creado: %s\n", path);
 	system(path);
+	printf("Fichero creado: %s\n", path);
 	// Crear el fichero de solicitudes pendientes de aceptar
 	sprintf(path,"%s%s%s/%s","touch ",DATA_PATH,username,"pendientes");
-	printf("Fichero creado: %s\n", path);
 	system(path);
+	printf("Fichero creado: %s\n", path);
 	// Crear el fichero con la contraseña del usuario y almacenarla
-	sprintf(path,"%s%s/%s",DATA_PATH,username,"password");
->>>>>>> refs/remotes/origin/pruebas
+	sprintf(path,"%s/%s/%s",DATA_PATH,username,"password");
+
 	FILE *file ;
 	if((file= fopen(path,"w+")) == NULL){
 		perror("Error creando fichero de usuario");
@@ -365,50 +349,7 @@ int makeReq(char* username, char* friendname){
 	
 	return 0;
 }
-<<<<<<< HEAD
-/*int getReqslist(User* usr,char** friendlist)
-{
-	char* aux;
-	int i = 0;
-	int j = 0;
 
-	//while(i < MAXFRIENDS)
-	//{
-		aux = usr->friends_request_pending[0];
-		printf("value: %s", aux);
-	// if(aux != NULL)
-	//	{
-	//	printf("value: %s", aux);
-	//		friendlist[j]=(char*)malloc(256*sizeof(char));
-	//		strcpy(friendlist[j], aux);
-	//		++j;
-	//	}
-		//i++;
-	//}
-	return j;
-}
-*/
-/*int listReqs(char* username ,cString* fl){
-	User *usr = getUser(username);
-//	return 0;
-	int nReqs;
-//	if(usr->logged == 1)
-//	{
-		nReqs=getReqslist(usr,fl);
-		return 0;
-	//	printf("%s\n", fl[0]);
-		//printf("%s\n",friends->data[0]);
-		if(DEBUG_MODE)
-			printf("ims__getFriendshipRequiests -> %s quiere su lista de peticiones pendientes\n",usr->username);
-//	}
-	return nReqs;
-}
-*/
-
-int getFriendRequestsPending(User* usr,char* friends[MAX_FRIENDS])
-{
-	if(usr->numPending > 0)
-=======
 
 /* Acepta la solicitud de amistad de otro usuario */
 int acceptReq(char *username, char *friendname) {
@@ -453,13 +394,27 @@ int acceptReq(char *username, char *friendname) {
 }
 
 int copyToFile(FILE* file,char* friends[MAXFRIENDS],int num) {
-	if(num > 0)
->>>>>>> refs/remotes/origin/pruebas
+	if(num > 0) {
+		for(i = 0; i < MAXFRIENDS; i++)
+		{
+			aux = friends[i];
+
+			if(aux != NULL)
+			{
+				fprintf(file,"%s\n",aux);
+			}
+		}
+	}
+	return 0;
+}
+				
+int getFriendRequestsPending(User* usr,char* friends[MAX_FRIENDS])
+{
+	if(usr->numPending > 0)
 	{
 		char* aux;
 		int i;
 
-<<<<<<< HEAD
 		for(i = 0; i < MAX_FRIENDS; i++)
 		{
 			aux = usr->friends_request_pending[i];
@@ -468,21 +423,12 @@ int copyToFile(FILE* file,char* friends[MAXFRIENDS],int num) {
 			{
 				friends[i] = (char*)malloc(256*sizeof(char));
 				strcpy(friends[i],aux);
-=======
-		for(i = 0; i < MAXFRIENDS; i++)
-		{
-			aux = friends[i];
-
-			if(aux != NULL)
-			{
-				fprintf(file,"%s\n",aux);
->>>>>>> refs/remotes/origin/pruebas
 			}
 		}
 	}
 	return 0;
 }
-<<<<<<< HEAD
+
 
 int haveReqs(char* user){
 	User *usr = getUser(user);
@@ -502,5 +448,4 @@ int getReqs(char* user, struct Char_vector *friends){
 			printf("ims__getFriendshipRequiests -> %s quiere su lista de peticiones pendientes\n",usr->username);
 	}
 }
-=======
->>>>>>> refs/remotes/origin/pruebas
+

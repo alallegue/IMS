@@ -108,7 +108,6 @@ int ims__sendReq(struct soap* soap, char* username, char* friendname, int *error
 	*error = makeReq(username,friendname);
 	return SOAP_OK;
 }
-<<<<<<< HEAD
 /*int ims__listReq(struct soap* soap,char* user ,cString* fl,int *result)
 {
 	*result= listReqs(user ,fl);
@@ -141,7 +140,6 @@ int ims__getFriendshipRequests(struct soap *soap, char* user,struct Char_vector 
 	}
 	return SOAP_OK;
 }*/
-=======
 
 int ims__acceptReq(struct soap* soap, char* username, char* friendname, int *error) {
 	*error = acceptReq(username, friendname);
@@ -152,5 +150,4 @@ int ims__cancelReq(struct soap* soap, char* username, char* friendname, int *err
 
 	return SOAP_OK;
 }
->>>>>>> refs/remotes/origin/pruebas
 

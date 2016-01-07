@@ -183,22 +183,14 @@ int sendReq(struct soap soap, char *serverURL) {
 			printf("Usuario no valido\n");
 			break;
 		case -4: 
-<<<<<<< HEAD
-			printf("Ese usuario ya es tu amigo\n");break;
-=======
 			printf("Ese usuario ya es tu amigo\n");
 			break;
->>>>>>> refs/remotes/origin/pruebas
 		case 1:
 			printf("No hay conexion con el servidor\n");
 			break;
 		case -6:
-<<<<<<< HEAD
-			printf("El otro usuario ha alcanzado el limite de amigos\n");break;
-=======
 			printf("El otro usuario ha alcanzado el limite de amigos\n");
 			break;
->>>>>>> refs/remotes/origin/pruebas
 		default:
 			break;
 	}
