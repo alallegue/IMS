@@ -268,6 +268,41 @@ int show_login(struct soap soap, char *serverURL) {
 
 	return res;
 }
+int listReq(struct soap soap, char *serverURL) {
+	struct Char_vector* friends = (struct Char_vector*)malloc(sizeof(struct Char_vector));
+	int i;
+	int numRequestPending = -2;
+	soap_call_ims__haveFriendshipRequest(&soap, serverURL,"",username,&numRequestPending);
+	printf("numero de peticiones: %d", numRequestPending);
+	if(numRequestPending > 0)
+	{
+		soap_call_ims__getFriendshipRequests(&soap, serverURL, "",username ,friends);
+		printf("Lista de amistades sin aceptar:\n");
+
+		for(i=0;i < 100;i++){
+			if(friends->data[i] != NULL){
+				printf("%d: %s\n",i,friends->data[i]);
+			}
+		}
+	}
+	else if(numRequestPending == -2){
+		printf("Hay un problema con la conexion\n");
+		return -1;
+
+	}
+	else if(numRequestPending == -1){
+			printf("No estas online\n");
+	}
+	else{
+		system("clear");
+		printf("No tienes peticiones de amistad\n");
+	}
+
+	free(friends);
+
+	printf("\n\n");
+	return 0;
+}
 
 /* Muestra el menú principal donde el usuario puede interactuar
  * con todas las funciones de la aplicación
@@ -296,13 +331,12 @@ int show_menu(struct soap soap, char *serverURL) {
 
 				break;
 			case 3: //Listar amigos
-				
+				error = listReq(soap, serverURL);
 				break;
 			case 4: //Solicitud de amistad
 				error = sendReq(soap, serverURL);
 				break;
 			case 5: 
-
 				break;
 			case 6: // Aceptar solicitud
 				error = acceptReq(soap, serverURL);
