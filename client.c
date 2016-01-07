@@ -5,6 +5,8 @@
 
 char *username, *password;
 
+
+
 /* FIN */
 /* Pedir al servidor iniciar sesion con un usuario existente */
 int login(struct soap soap, char *serverURL){
@@ -163,17 +165,17 @@ int sendMessage(struct soap soap, char *serverURL) {
 	return 0;
 }
 
-/*  */
-int sendReq(struct soap soap, char *serverURL){
+/* Envía una solicitud de amistad a otro usuario */
+int sendReq(struct soap soap, char *serverURL) {
 	int error;
 	char* friendname=(char*)malloc(256*sizeof(char));
 	printf("Introduce el nombre de usuario a agregar: \n");
 	scanf("%s",friendname);
 	soap_call_ims__sendReq(&soap, serverURL, "", username, friendname, &error);
-	printf("error: %d\n", error);
 	switch(error) {
 		case 0:
 			printf("Solicitud enviada\n");
+			break;
 		case -5:
 			printf("Has alcanzado el limite de amigos\n");
 			break;
@@ -181,17 +183,58 @@ int sendReq(struct soap soap, char *serverURL){
 			printf("Usuario no valido\n");
 			break;
 		case -4: 
+<<<<<<< HEAD
 			printf("Ese usuario ya es tu amigo\n");break;
+=======
+			printf("Ese usuario ya es tu amigo\n");
+			break;
+>>>>>>> refs/remotes/origin/pruebas
 		case 1:
 			printf("No hay conexion con el servidor\n");
 			break;
 		case -6:
+<<<<<<< HEAD
 			printf("El otro usuario ha alcanzado el limite de amigos\n");break;
+=======
+			printf("El otro usuario ha alcanzado el limite de amigos\n");
+			break;
+>>>>>>> refs/remotes/origin/pruebas
 		default:
 			break;
 	}
 	free (friendname);
 	return 1;
+}
+
+/* Acepta una solicitud de amistad enviada por otro usuario */
+int acceptReq(struct soap soap,char *serverURL) {
+	char* friendname;
+	int res = 1;
+	
+	friendname = (char*)malloc(256*sizeof(char));
+	
+	printf("Introduce nombre de solicitud: ");
+	scanf("%s", friendname);
+	
+	printf("¿Aceptas o rechazas la solicitud? (a/r/c): \n");
+	char ar;
+	scanf(" %c", &ar);
+	
+	if(ar == 'a') {
+		soap_call_ims__acceptReq(&soap, serverURL,"",username,friendname,&res);
+		if(res == 0)
+			printf("%s agregado a amigos\n", friendname);
+		else
+			printf("Algo ha fallado\n");
+	}
+	else if(ar == 'r') {
+		soap_call_ims__cancelReq(&soap, serverURL,"",username ,friendname,&res);
+		if(res == 0)
+			printf("Solicitud de %s rechazada\n", friendname); 
+	}
+	else
+		printf("Operacion cancelada\n");
+	 
 }
 
 /* Menú de bienvenida. 
@@ -204,9 +247,9 @@ int show_login(struct soap soap, char *serverURL) {
 	while(op != 0 && res != 0){
 		if(!DEBUG_MODE) system("clear");
 		printf("	Bienvenido. Selecciona una opcion: \n");
-		printf("	1) Entrar.\n");
-		printf("	2) Registrarse.\n");
-		printf("	0) Salir.\n");
+		printf("	1) Entrar\n");
+		printf("	2) Registrarse\n");
+		printf("	0) Salir\n");
 
 		scanf("%d",&op);
 		switch(op) {
@@ -283,7 +326,8 @@ int show_menu(struct soap soap, char *serverURL) {
 		printf("	3) Listar usuarios amigos\n");
 		printf("	4) Enviar solicitud de amistad\n");
 		printf("	5) Ver solicitudes de amistad\n");
-		printf("	6) Dar de baja\n");
+		printf("	6) Aceptar solicitudes de amistad\n");
+		printf("	7) Dar de baja\n");
 		printf("	0) Salir\n");
 		scanf("%d", &in);
 		
@@ -302,7 +346,10 @@ int show_menu(struct soap soap, char *serverURL) {
 				break;
 			case 5: 
 				break;
-			case 6: //Baja
+			case 6: // Aceptar solicitud
+				error = acceptReq(soap, serverURL);
+				break;
+			case 7: //Baja
 				q = deleteUser(soap, serverURL);
 				break;
 			case 0: //Salir

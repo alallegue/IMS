@@ -32,6 +32,13 @@ int ims__deleteUser(char* username, int *error);
 int ims__logout(char* username, int *error);
 
 int ims__sendReq(char* username, char* friendname, int *error);
+<<<<<<< HEAD
 int ims__getFriendshipRequests(char* user , struct Char_vector *friends);
 int ims__haveFriendshipRequest(char* user,int *result);
 //int ims__getFriendshipRequest(char* user,String* friend_nick);
+=======
+//int ims__getNumReq(char* username, int* numReq);
+//int ims__getReq(char* username, char* friendname);
+int ims__acceptReq(char* username, char* friendname, int *error);
+int ims__cancelReq(char* username, char* friendname, int *error);
+>>>>>>> refs/remotes/origin/pruebas

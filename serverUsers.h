@@ -38,5 +38,7 @@ int deliverReqfriend(User* usr,char* friendname);
 int deliverReqPending(User* usr,char* friendname);
 int addFriend(User* usr,char* friendname);
 
+int deleteReqFriend(User* user, char* friendname);
+int deleteReqPending(User* user, char* friendname);
 
 #endif
