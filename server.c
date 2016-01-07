@@ -146,8 +146,14 @@ int ims__acceptReq(struct soap* soap, char* username, char* friendname, int *err
 	return SOAP_OK;
 }
 
+/* SIN HACER */
 int ims__cancelReq(struct soap* soap, char* username, char* friendname, int *error) {
 
+	return SOAP_OK;
+}
+
+int ims__deleteFriend(struct soap* soap, char* username, char* friendname, int *error) {
+	*error = deleteFriend(username, friendname);
 	return SOAP_OK;
 }
 

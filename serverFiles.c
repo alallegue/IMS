@@ -440,3 +440,34 @@ int getReqs(char* user, struct Char_vector *friends){
 	}
 }
 
+/* FIN */
+int deleteFriend(char* username, char* friendname) {
+	User* user = getUser(username);
+	
+	printf("%s va a borrar al amigo %s\n", username, friendname);
+	
+	//if(strcmp(user,friendname) == 0){
+		//return -3; 
+	//}
+	//if(user->logged == 1)
+	//{
+		// Obtener el usuario amigo y borrar de la lista de amigos de ambos usuarios
+		if(alreadyFriend(user, friendname) == 1) {
+			User *friend = getUser(friendname);
+			rmFriend(user, friendname);
+			rmFriend(friend, username);
+		}
+		// No encontrado
+		else {
+			printf("No son amigos\n");
+			return -2;
+		}
+	//}else
+	//{
+		//return = -1;
+	//}
+	
+	printf("%s ha borrado a %s\n", username, friendname);
+	
+	return 0;
+}

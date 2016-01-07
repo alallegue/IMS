@@ -241,4 +241,35 @@ int deleteReqPending(User* user,char* friendname) {
 	return found;
 }
 
+/* MEJORAR */ 
+/* Elimina un amigo de la lista de amigos del usuario dado */
+int rmFriend(User* user, char* friendname) {
+	int i = 0;
+	int found = 0;
+	char* aux;
+	while(i < MAXFRIENDS && found == 0){
+		aux = user->friends[i];
+		if(aux != NULL) {
+			if(strcmp(aux, friendname) == 0){
+				found = 1;
+			}
+		}
+		//if(found == 0)
+			i++;
+	}
+	if(found == 1){
+		// Eliminar amigo en memoria
+		free(user->friends[i-1]);
+		user->friends[i-1] = NULL;
+		user->numFriends--;
+		// Eliminar el fichero del amigo
+		char *path = (char*)malloc(256*sizeof(char));
+		sprintf(path,"rm %s%s/%s",DATA_PATH, user->username, friendname);
+		system(path);
+		free(path);
+	}
+	return found;
+	
+}
+
 
