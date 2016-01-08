@@ -15,9 +15,9 @@ User* userInit(char* username,char* password){
 		user->friends_request_pending[i] = NULL;
 		user->friends_request_send[i] = NULL;
 
-		/*user->files[i] = (struct Files*)malloc(sizeof(struct Files));
+		user->files[i] = (struct Files*)malloc(sizeof(struct Files));
 		user->files[i]->file = NULL;
-		user->files[i]->friend_nick = NULL;*/
+		user->files[i]->friendname = NULL;
 	}
 
 	user->logged = 0;
@@ -206,6 +206,7 @@ int deleteReqPending(User* user,char* friendname) {
 	// Buscar la posicion del amigo en la lista de solicitudes pendientes
 	while(i < MAXFRIENDS && found == 0){
 		aux = user->friends_request_pending[i];
+		printf("%s  ", aux);
 		if(aux != NULL){
 			if(strcmp(aux,friendname) == 0){
 				found = 1;
@@ -214,6 +215,7 @@ int deleteReqPending(User* user,char* friendname) {
 		if(found == 0)
 			i++;
 	}
+	printf("deleteReqPending %d\n", found);
 	if(found == 1){
 		// Eliminar la solicitud en memoria
 		free(user->friends_request_pending[i]);
@@ -272,4 +274,13 @@ int rmFriend(User* user, char* friendname) {
 	
 }
 
+int printUser(User* user){
+	printf("Nombre: %s pass: %s logueado: %d numFriends: %d numEnviados %d numPendientes %d\n", user->username, user->password, user->logged, user->numFriends, user->numSend, user->numPending);
+	
+/*
+	char* friends[MAXFRIENDS];//friends who accepted your friendship request
+	char* friends_request_send[MAXFRIENDS];//friends that you've sent friendship request
+	char* friends_request_pending[MAXFRIENDS];//friends who have sent friendship request to you
+	*/
+}
 

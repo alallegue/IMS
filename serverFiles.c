@@ -282,7 +282,7 @@ int logout(char* username){
 	}
 	// Marcar desconectado
 	user->logged = 0;
-	//closeFiles(user);
+	closeFiles(user);
 	userFree(user);
 	printf("Usuario %s desconectado\n", username);
 	
@@ -309,7 +309,7 @@ int makeReq(char* username, char* friendname){
 	if(alreadyFriend(usr,friendname) == 1)
 		return -4;
 	// Insertar amigo en la lista de solicitudes pendientes	
-	if(deliverReqfriend(usr,friendname) == 0) {
+	if(deliverReqfriend(usr, friendname) == 0) {
 		FILE *file;
 		char path[100];
 		sprintf(path,"%s%s/enviados",DATA_PATH,username);
@@ -325,7 +325,7 @@ int makeReq(char* username, char* friendname){
 			perror("El fichero no existe");
 		
 		// Insertar usuario en la lista de solicitudes pendientes del amigo
-		if(deliverReqPending(usr,friendname) == 0) {
+		if(deliverReqPending(friend, username) == 0) {
 			sprintf(path,"%s%s/pendientes",DATA_PATH,friendname);
 
 			if(DEBUG_MODE) printf("ims__sendFriendshipRequiest -> Path: %s\n",path);
@@ -359,6 +359,10 @@ int acceptReq(char *username, char *friendname) {
 	if(user->logged == 1) {
 		printf("Aceptar solicitud de %s a %s\n:", username, friendname);
 		// Eliminar la solicitud pendiente 
+		printf("Este usuario :\n");
+		printUser(user);
+		printf("Amigo: \n");
+		printUser(friend);
 		int found = deleteReqPending(user,friendname);
 		if(found == 1) {
 			// Eliminar la solicitud enviada
@@ -471,3 +475,113 @@ int deleteFriend(char* username, char* friendname) {
 	
 	return 0;
 }
+
+int sendMessage(char *username, struct Message myMessage) {
+	User* user = getUser(username);
+	User* friend = getUser(myMessage.name);
+	int is_friend = 0;
+	printf("Usuario %s manda mensaje a %s\n", username, myMessage.name);
+	if(user->logged == 1) {
+		is_friend = alreadyFriend(user, myMessage.name);
+		if(is_friend == 1) {
+			char path[100];
+			// Obtener la ruta del usuario con el fichero amigo
+			sprintf(path, "%s%s/%s", DATA_PATH, username, myMessage.name);
+									
+			// Buscar el fichero de mensajes del amigo y abrirlo
+			int pos = -1;
+			FILE* file;					
+			if(isFileOpen(user, myMessage.name, &pos) == 0) {
+				if((file = fopen(path, "a+")) == NULL) 
+					perror("Error abriendo fichero");
+
+				user->files[pos]->friendname = (char*)malloc(256*sizeof(char));
+				strcpy(user->files[pos]->friendname, friend->username);
+
+				user->files[pos]->file = file;
+			}else {
+				file = user->files[pos]->file;
+			}
+			// Escribir el mensaje en el fichero
+			fprintf(file, "%s : %s\n", username, myMessage.msg);
+			fflush(file);
+			printf("Escrito mensaje en el fichero %s\n", path);
+						
+			// Obtener la ruta del amigo con el fichero del usuario
+			sprintf(path,"%s%s/%s", DATA_PATH, myMessage.name, username);
+			
+			// Buscar el fichero de mensajes del usuario y abrirlo
+			pos = -1;
+			if(isFileOpen(friend, username, &pos) == 0) {
+				if((file = fopen(path, "a+")) == NULL) 
+					perror("Error abriendo fichero");
+				friend->files[pos]->friendname = (char*)malloc(256*sizeof(char));
+				strcpy(friend->files[pos]->friendname,user->username);
+				friend->files[pos]->file = file;
+			}
+			else {
+				file = friend->files[pos]->file;
+			}
+			fprintf(file,"%s : %s\n", username, myMessage.msg);
+			fflush(file);
+			printf("Escrito mensaje en el fichero %s\n", path);
+			
+			return 0;
+		}
+		else {
+			return -1;
+		}
+	}
+	else {
+		return -2;
+	}
+
+	
+	
+}
+
+
+int isFileOpen(User* user,char* friendname, int *pos) {
+	char* aux;
+	int i = 0;
+	int found = 0;
+	*pos = -1;
+	while( i < MAXFRIENDS && found == 0) {
+		aux = user->files[i]->friendname;
+		if(aux != NULL)	{
+			if(strcasecmp(aux, friendname) == 0) {
+				found = 1;
+				*pos = i;
+			}
+		}else
+		{
+			if(*pos == -1)*pos = i;
+		}
+		i++;
+	}
+	return found;
+	
+}
+
+int closeFiles(User* user) {
+	printf("Cerrando ficheros abiertos de %s\n", user->username);
+	char* aux;
+	FILE *file;
+	int i;
+	for(i = 0; i < MAXFRIENDS; i++)	{
+		aux = user->files[i]->friendname;
+		if(aux != NULL)	{
+			file = user->files[i]->file;
+			if(fclose(file) == -1) 
+				perror("Error cerrando fichero");
+			free(user->files[i]->friendname);
+		}
+	}
+	printf("Cerrados\n");
+	return 0;
+	
+}
+
+
+
+>>>>>>> refs/remotes/origin/master

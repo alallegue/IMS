@@ -9,7 +9,7 @@
 
 struct Files{
 	FILE *file;
-	char *friend_nick;
+	char *friendname;
 };
 
 typedef struct {
@@ -21,7 +21,7 @@ typedef struct {
 	int numSend;
 	int numPending;
 
-	//struct Files *files[MAXFRIENDS];
+	struct Files *files[MAXFRIENDS];
 
 	char* friends[MAXFRIENDS];//friends who accepted your friendship request
 	char* friends_request_send[MAXFRIENDS];//friends that you've sent friendship request
@@ -42,5 +42,6 @@ int deleteReqFriend(User* user, char* friendname);
 int deleteReqPending(User* user, char* friendname);
 
 int rmFriend(User* user, char* friendname);
+int printUser(User* user);
 
 #endif

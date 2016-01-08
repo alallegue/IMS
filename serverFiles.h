@@ -39,7 +39,9 @@ int getFriendRequestsPending(User* usr,char* friends[MAX_FRIENDS]);
 int haveReqs(char* user);
 int getReqs(char* user,struct Char_vector *friends);
 int deleteFriend(char* username, char* friendname);
-
-
+int copyToFile(FILE* file, char* friends[MAXFRIENDS], int num);
+int sendMessage(char *username, struct Message myMessage);
+int isFileOpen(User* user,char* friendname, int *pos);
+int closeFiles(User* user);
 
 #endif

@@ -117,53 +117,90 @@ int logout(struct soap soap,char* serverURL) {
 	return 0;
 }
 
-int sendMessage(struct soap soap, char *serverURL) {
-	struct Message myMsgA, myMsgB;
+int sendMessage(struct soap soap,char *serverURL) {
+	struct Message myMessage;
+	myMessage.name = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
+	myMessage.msg = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
+	int error = 1;
+
+	system("clear");
+
+	printf("¿A quien vas a escribir? ");
+	scanf("%s", myMessage.name);
+
+	//espera a leer una linea entera
+	printf("Escribe el mensaje:\n");
+	while(getchar() != '\n');
+	fgets(myMessage.msg, IMS_MAX_MSG_SIZE, stdin);
+
+	//limpiado de salto de linea
+	char *clean;
+	clean = strchr(myMessage.msg, '\n');
+	if (clean){
+		*clean = '\0';
+	}
+
+	soap_call_ims__sendMessage(&soap, serverURL, "", username, myMessage, &error);
 	
-	/*
-	printf("Mensaje a enviar: ");
-	scanf("%s", string);
-	
-	// Allocate space for the message field of myMsgA then copy into it
-	myMsgA.msg = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
-	// Not necessary with strcpy since uses null-terminated strings
-	// memset(myMsgA.msg, 0, IMS_MAX_MSG_SIZE); 
-	strcpy (myMsgA.msg, msg);
-
-	// Allocate space for the name field of myMsgA then copy into it
-	myMsgA.name = (xsd__string) malloc (IMS_MAX_NAME_SIZE);
-	// Not necessary with strcpy since uses null-terminated strings
-	// memset(myMsgA.name, 0, IMS_MAX_NAME_SIZE);
-	strcpy (myMsgA.name, username);
-
-	myMsgA.operation = op;
-
-	// Send the contents of myMsgA to the server
-		soap_call_ims__sendMessage (&soap, serverURL, "", myMsgA, &res);
-			
-	// Check for errors...
-	if (soap.error) {
-		soap_print_fault(&soap, stderr); 
-		exit(1);
+	if(error == 0){
+		printf("Mensaje enviado con exito\n");
 	}
-	else {
-		printf("Exito\n");
+	else if (error == 1){
+		printf("No hay conexion con el servidor\n\n");
+		return -1;
+	}
+	else if (error == -1){
+		printf("Solo puedes enviar mensajes a tus amigos\n");
+	}
+	else if (error == -2){
+		printf("No estas online.\n");
 	}
 
-	// Receive a Message struct from the server into myMsgB
-		//soap_call_ims__receiveMessage (&soap, serverURL, "", &myMsgB);
+	free(myMessage.name);
+	free(myMessage.msg);
 
-	// Check for errors...
-	if (soap.error) {
-		soap_print_fault(&soap, stderr); 
-		exit(1);
-	}
-	else{}
-		//printf ("Received from server: \n\tusername: %s \n\tmsg: %s\n", myMsgB.name, myMsgB.msg);    
-		
-	*/	
 	return 0;
 }
+
+int readMessage(struct soap soap,char *serverURL) {
+	system("clear");
+
+	Message myMessage;
+	myMessage.name = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
+	myMessage.msg = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
+	myMessage.error = 1;
+
+	printf("Escriba el nombre de su amigo: ");
+	scanf("%s", myMessage.name);
+
+	soap_call_ims__receiveMessage(&soap,serverURL,"",user,NUM_MESSAGES,myMessage.name,&myMessage);
+
+	if(myMessage.error == 0){
+		printf("%s\n",myMessage.msg);
+	}
+	else if(myMessage.error == 1){
+		printf("Hay un problema con la conexion\n");
+		return -1;
+	}
+	else if(myMessage.error == -1){
+		printf("No estas conectado\n");
+	}
+	else if(myMessage.error == -2){
+		printf("Ese no es tu amigo\n");
+	}
+	else if(myMessage.error == -3){
+		printf("No puedes leer mensajes de ti mismo, buscate un amigo\n");
+	}
+
+
+
+	free(myMessage.name);
+	free(myMessage.msg);
+
+	return 0;
+	
+}
+
 
 /* Envía una solicitud de amistad a otro usuario */
 int sendReq(struct soap soap, char *serverURL) {
@@ -358,15 +395,16 @@ int show_menu(struct soap soap, char *serverURL) {
 				error = sendMessage(soap, serverURL);
 				break;
 			case 2: //Mostrar mensajes entrantes
-
+				error = readMessage(soap, serverURL);
 				break;
 			case 3: //Listar amigos
-				error = listReq(soap, serverURL);
+				
 				break;
 			case 4: //Solicitud de amistad
 				error = sendReq(soap, serverURL);
 				break;
-			case 5: 
+			case 5: // Ver solicitudes
+				error = listReq(soap, serverURL);
 				break;
 			case 6: // Aceptar solicitud
 				error = acceptReq(soap, serverURL);
