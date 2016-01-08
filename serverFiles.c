@@ -309,7 +309,7 @@ int makeReq(char* username, char* friendname){
 	if(alreadyFriend(usr,friendname) == 1)
 		return -4;
 	// Insertar amigo en la lista de solicitudes pendientes	
-	if(deliverReqfriend(usr,friendname) == 0) {
+	if(deliverReqfriend(usr, friendname) == 0) {
 		FILE *file;
 		char path[100];
 		sprintf(path,"%s%s/enviados",DATA_PATH,username);
@@ -325,7 +325,7 @@ int makeReq(char* username, char* friendname){
 			perror("El fichero no existe");
 		
 		// Insertar usuario en la lista de solicitudes pendientes del amigo
-		if(deliverReqPending(usr,friendname) == 0) {
+		if(deliverReqPending(friend, username) == 0) {
 			sprintf(path,"%s%s/pendientes",DATA_PATH,friendname);
 
 			if(DEBUG_MODE) printf("ims__sendFriendshipRequiest -> Path: %s\n",path);
@@ -359,6 +359,10 @@ int acceptReq(char *username, char *friendname) {
 	if(user->logged == 1) {
 		printf("Aceptar solicitud de %s a %s\n:", username, friendname);
 		// Eliminar la solicitud pendiente 
+		printf("Este usuario :\n");
+		printUser(user);
+		printf("Amigo: \n");
+		printUser(friend);
 		int found = deleteReqPending(user,friendname);
 		if(found == 1) {
 			// Eliminar la solicitud enviada
