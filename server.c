@@ -51,22 +51,12 @@ int ims__sendMessage (struct soap *soap, char* username, struct Message myMessag
 	return SOAP_OK;
 }
 
-int ims__receiveMessage (struct soap *soap, struct Message *myMessage){
-
-	// Allocate space for the message field of the myMessage struct then copy it
-	myMessage->msg = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
-	// Not necessary with strcpy since uses null-terminated strings
-	// memset(myMessage->msg, 0, IMS_MAX_MSG_SIZE);
-	strcpy (myMessage->msg, "Invoking the remote function receiveMessage simply retrieves this standard message from the server"); // always same msg
-
-	// Allocate space for the name field of the myMessage struct then copy it
-	myMessage->name = (xsd__string) malloc (IMS_MAX_NAME_SIZE);
-	// Not necessary with strcpy since uses null-terminated strings
-	// memset(myMessage->name, 0, IMS_MAX_NAME_SIZE);  
-	strcpy(myMessage->name, "aServer");	
+/*
+int ims__receiveMessage(struct soap *soap, char* user, char* friendname, int numMensajes, struct Message *myMessage) {
 
 	return SOAP_OK;
 }
+*/
 
 int ims__registerUser(struct soap *soap, char* username, char* password, int *error) {
 	*error = addUser(username, password);

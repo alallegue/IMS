@@ -582,6 +582,3 @@ int closeFiles(User* user) {
 	
 }
 
-
-
->>>>>>> refs/remotes/origin/master
