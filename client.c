@@ -305,6 +305,7 @@ int show_login(struct soap soap, char *serverURL) {
 
 	return res;
 }
+
 int listReq(struct soap soap, char *serverURL) {
 	struct Char_vector* friends = (struct Char_vector*)malloc(sizeof(struct Char_vector));
 	int i;
@@ -341,6 +342,34 @@ int listReq(struct soap soap, char *serverURL) {
 	return 0;
 }
 
+int deleteFriend(struct soap soap, char* serverURL) {
+	char *friendname = (char*)malloc(256*sizeof(char));
+	int error = 1;
+	printf("Introduce el nombre del amigo que quieres borrar: \n");
+	scanf("%s", friendname);
+
+	soap_call_ims__deleteFriend(&soap, serverURL, "", username, friendname, &error);
+
+	if(error == 1){
+		printf("No hay conexion con el servidor\n");
+		return -1;
+	}
+	else if (error == -1){
+		printf("No estas conectado\n");
+		return -1;
+	}
+	else if(error == -2){
+		printf("Ese usuario no es tu amigo\n");
+	}
+	//else if(error == -3){
+		//printf("No puedes borrarte a ti mismo de amigos\n");
+	//}
+	else if(error == 0){
+		printf("%s ya no es tu amigo\n", friendname);
+	}
+	return 0;
+}
+
 /* Muestra el menú principal donde el usuario puede interactuar
  * con todas las funciones de la aplicación
 */
@@ -357,6 +386,7 @@ int show_menu(struct soap soap, char *serverURL) {
 		printf("	5) Ver solicitudes de amistad\n");
 		printf("	6) Aceptar solicitudes de amistad\n");
 		printf("	7) Dar de baja\n");
+		printf("	8) Borrar amigo\n");
 		printf("	0) Salir\n");
 		scanf("%d", &in);
 		
@@ -381,6 +411,9 @@ int show_menu(struct soap soap, char *serverURL) {
 				break;
 			case 7: //Baja
 				q = deleteUser(soap, serverURL);
+				break;
+			case 8:
+				q = deleteFriend(soap, serverURL);
 				break;
 			case 0: //Salir
 				q = logout(soap, serverURL);
