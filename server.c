@@ -45,25 +45,9 @@ int main(int argc, char **argv){
   return 0;
 }
 
-int procesaMensaje(struct Message message) {
-	char usuario[200];	
-	switch(message.operation) {
-		case 1: //Alta usuario
-			strcpy(usuario, message.name);
-			printf("%s\n", usuario);
-			break;
-		case 2: //Baja usuario
-			
-			break;
-		default:break;
-	}
 
-	return 0;
-}
-
-int ims__sendMessage (struct soap *soap, struct Message myMessage, int *result){
-	*result = procesaMensaje(myMessage);	
-	//printf ("Received by server: \n\tusername:%s \n\tmsg:%s\n toperation:%d\n", myMessage.name, myMessage.msg, myMessage.operation);
+int ims__sendMessage (struct soap *soap, char* username, struct Message myMessage, int *result){
+	*result = sendMessage(username, myMessage);
 	return SOAP_OK;
 }
 
@@ -108,11 +92,7 @@ int ims__sendReq(struct soap* soap, char* username, char* friendname, int *error
 	*error = makeReq(username,friendname);
 	return SOAP_OK;
 }
-/*int ims__listReq(struct soap* soap,char* user ,cString* fl,int *result)
-{
-	*result= listReqs(user ,fl);
-	return SOAP_OK;
-}*/
+
 int ims__haveFriendshipRequest(struct soap *soap, char* user,int *result)
 {
 	*result=haveReqs(user);
@@ -124,22 +104,6 @@ int ims__getFriendshipRequests(struct soap *soap, char* user,struct Char_vector 
 	getReqs(user,friends);
 	return SOAP_OK;
 }
-
-/*int ims__getFriendshipRequest(struct soap *soap, char* user,String* friend_nick)
-{
-	User *usr = getUser(user);
-	if(usr->logged == 1)
-	{
-		//int found =
-		//char* aux = (char*)malloc(sizeof(char*));
-		getFriendRequestPending(usr,&friend_nick->str);
-		//friend_nick->name = aux;
-		if(DEBUG_MODE) printf("ims__getFriendshipRequest -> Peticion %s\n",friend_nick->str);
-		//*friend_nick = *aux;
-		//printf("Primera peticion %s\n",friend_nick);
-	}
-	return SOAP_OK;
-}*/
 
 int ims__acceptReq(struct soap* soap, char* username, char* friendname, int *error) {
 	*error = acceptReq(username, friendname);

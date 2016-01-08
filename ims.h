@@ -23,9 +23,9 @@ struct Char_vector {
 };
 
 
-int ims__sendMessage (struct Message myMessage, int *result);
-int ims__receiveMessage (struct Message *myMessage);
-
+int ims__sendMessage (char *username, struct Message myMessage, int *error);
+int ims__receiveMessage (char *username, struct Message *myMessage);
+//soap_call_ims__receiveMessage(&soap,serverURL,"",user,NUM_MESSAGES,myMessage.name,&myMessage);
 int ims__login(char* username, char* password, int *error);
 int ims__registerUser(char* username, char* password, int *error);
 int ims__deleteUser(char* username, int *error);
@@ -37,3 +37,4 @@ int ims__haveFriendshipRequest(char* user,int *result);
 //int ims__getFriendshipRequest(char* user,String* friend_nick);
 int ims__acceptReq(char* username, char* friendname, int *error);
 int ims__cancelReq(char* username, char* friendname, int *error);
+
