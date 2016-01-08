@@ -6,7 +6,6 @@
 char *username, *password;
 
 
-
 /* FIN */
 /* Pedir al servidor iniciar sesion con un usuario existente */
 int login(struct soap soap, char *serverURL){
@@ -163,9 +162,10 @@ int sendMessage(struct soap soap,char *serverURL) {
 }
 
 int readMessage(struct soap soap,char *serverURL) {
+	/*
 	system("clear");
 
-	Message myMessage;
+	struct Message myMessage;
 	myMessage.name = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
 	myMessage.msg = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
 	myMessage.error = 1;
@@ -173,7 +173,7 @@ int readMessage(struct soap soap,char *serverURL) {
 	printf("Escriba el nombre de su amigo: ");
 	scanf("%s", myMessage.name);
 
-	soap_call_ims__receiveMessage(&soap,serverURL,"",user,NUM_MESSAGES,myMessage.name,&myMessage);
+	soap_call_ims__receiveMessage(&soap,serverURL,"", username,myMessage.name,NUM_MESSAGES,&myMessage);
 
 	if(myMessage.error == 0){
 		printf("%s\n",myMessage.msg);
@@ -198,7 +198,7 @@ int readMessage(struct soap soap,char *serverURL) {
 	free(myMessage.msg);
 
 	return 0;
-	
+	*/
 }
 
 
