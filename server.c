@@ -111,3 +111,12 @@ int ims__deleteFriend(struct soap* soap, char* username, char* friendname, int *
 	return SOAP_OK;
 }
 
+int ims__haveFriends(struct soap *soap, char* user,int *result){
+	*result=haveFriends(user);
+	return SOAP_OK;
+}
+
+int ims__getFriends(struct soap *soap, char* user ,struct Char_vector* friends){
+	getFriends(user, friends);
+	return SOAP_OK;
+}

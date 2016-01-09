@@ -370,6 +370,48 @@ int deleteFriend(struct soap soap, char* serverURL) {
 	return 0;
 }
 
+
+
+int listFriends(struct soap soap, char *serverURL) {
+	struct Char_vector* friends = (struct Char_vector*)malloc(sizeof(struct Char_vector));
+	int i;
+	int numFriends = -2;
+	soap_call_ims__haveFriends(&soap, serverURL,"",username,&numFriends);
+	if(numFriends > 0)
+	{
+
+		soap_call_ims__getFriends(&soap, serverURL, "",username ,friends);
+
+		system("clear");
+		printf("Lista de amigos:\n");
+
+		for(i=0;i < 100;i++){
+			if(friends->data[i] != NULL){
+				printf("%d: %s\n",i,friends->data[i]);
+			}
+		}
+	}else if (numFriends == 0)
+	{
+		//system("clear");
+		printf("¡No tienes amigos!\n");
+	}
+	else if (numFriends == -2){
+		//system("clear");
+		printf("Hay un problema con la conexion\n");
+		return -1;
+
+	}
+	else if (numFriends == -1){
+		//system("clear");
+		printf("No estas online\n");
+	}
+
+	free(friends);
+
+	printf("\n\n");
+
+	return 0;
+}
 /* Muestra el menú principal donde el usuario puede interactuar
  * con todas las funciones de la aplicación
 */
@@ -398,7 +440,7 @@ int show_menu(struct soap soap, char *serverURL) {
 				error = readMessage(soap, serverURL);
 				break;
 			case 3: //Listar amigos
-				
+				error=listFriends(soap, serverURL);
 				break;
 			case 4: //Solicitud de amistad
 				error = sendReq(soap, serverURL);

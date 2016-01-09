@@ -37,3 +37,5 @@ int ims__acceptReq(char* username, char* friendname, int *error);
 int ims__cancelReq(char* username, char* friendname, int *error);
 int ims__deleteFriend(char* username, char* friendname, int *error);
 
+int ims__getFriends(char* user ,struct Char_vector *friends);
+int ims__haveFriends(char* user,int *result);
