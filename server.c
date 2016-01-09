@@ -99,9 +99,8 @@ int ims__acceptReq(struct soap* soap, char* username, char* friendname, int *err
 	return SOAP_OK;
 }
 
-/* SIN HACER */
 int ims__cancelReq(struct soap* soap, char* username, char* friendname, int *error) {
-
+	*error = deleteReq(username, friendname);
 	return SOAP_OK;
 }
 
