@@ -266,45 +266,6 @@ int acceptReq(struct soap soap,char *serverURL) {
 	 
 }
 
-/* Menú de bienvenida. 
- * Es el primero que se muestra y solicita
- * al usuario crear una cuenta o iniciar con una ya creada*/
-int show_login(struct soap soap, char *serverURL) {
-	int op = -1;
-	int res = -1;
-	
-	while(op != 0 && res != 0){
-		if(!DEBUG_MODE) system("clear");
-		printf("	Bienvenido. Selecciona una opcion: \n");
-		printf("	1) Entrar\n");
-		printf("	2) Registrarse\n");
-		printf("	0) Salir\n");
-
-		scanf("%d",&op);
-		switch(op) {
-			case 1: //Login
-				res = login(soap, serverURL);
-				//Si se loguea correctamente entrar al menú principal
-				if(res == 0) 
-					show_menu(soap, serverURL);
-				res = 1;
-				op = -1;
-				break;
-			case 2: //Registro
-				registerUser(soap,serverURL);
-				op = -1;
-				res = -1;
-				break;
-			case 0:
-				printf("Adios!\n");
-				break;
-			default:
-				break;
-		}
-	}
-
-	return res;
-}
 
 int listReq(struct soap soap, char *serverURL) {
 	struct Char_vector* friends = (struct Char_vector*)malloc(sizeof(struct Char_vector));
@@ -412,53 +373,90 @@ int listFriends(struct soap soap, char *serverURL) {
 
 	return 0;
 }
+
+/* Menú de bienvenida. 
+ * Es el primero que se muestra y solicita
+ * al usuario crear una cuenta nueva o iniciar sesión con una ya creada*/
+int show_login(struct soap soap, char *serverURL) {
+	int sel;
+	int loop = 0;
+	
+	while(loop == 0) {
+		printf("	Bienvenido. Selecciona una opcion: \n");
+		printf("	1) Entrar\n");
+		printf("	2) Registrarse\n");
+		printf("	0) Salir\n");
+
+		scanf("%d", &sel);
+		system("clear");
+		switch(sel) {
+			case 1: //Login
+				//Si se loguea correctamente entrar al menú principal
+				if(login(soap, serverURL) == 0) 
+					show_menu(soap, serverURL);
+				break;
+			case 2: //Registro
+				registerUser(soap,serverURL);
+				break;
+			case 0:
+				printf("Adios!\n");
+				loop = 1;
+				break;
+			default:
+				break;
+		}
+	}
+
+	return 0;
+}
+
 /* Muestra el menú principal donde el usuario puede interactuar
- * con todas las funciones de la aplicación
-*/
+ * con todas las funciones de la aplicación */
 int show_menu(struct soap soap, char *serverURL) {
-	int q = 0, error;
-	while(!q) {
-		int in;
-		if(!DEBUG_MODE) system("clear");
-		printf("	Hola, %s. Selecciona una opcion:\n", username);
+	int sel;
+	int loop = 0;
+	
+	while(loop == 0) {
+		printf("	Hola %s. Selecciona una opcion:\n", username);
 		printf("	1) Enviar mensaje a otro usuario\n");
-		printf("	2) Mostrar nuevos mensajes entrantes\n");
+		printf("	2) Mostrar mensajes\n");
 		printf("	3) Listar usuarios amigos\n");
 		printf("	4) Enviar solicitud de amistad\n");
-		printf("	5) Ver solicitudes de amistad\n");
+		printf("	5) Ver solicitudes de amistad pendientes\n");
 		printf("	6) Aceptar solicitudes de amistad\n");
-		printf("	7) Dar de baja\n");
-		printf("	8) Borrar amigo\n");
+		printf("	7) Borrar amigo\n");
+		printf("	8) Dar de baja esta cuenta\n");
 		printf("	0) Salir\n");
-		scanf("%d", &in);
 		
-		switch(in) {
-			case 1: //Enviar mensaje
-				error = sendMessage(soap, serverURL);
+		scanf("%d", &sel);
+		system("clear");
+		switch(sel) {
+			case 1:
+				sendMessage(soap, serverURL);
 				break;
-			case 2: //Mostrar mensajes entrantes
-				error = readMessage(soap, serverURL);
+			case 2:
+				readMessage(soap, serverURL);
 				break;
-			case 3: //Listar amigos
-				error=listFriends(soap, serverURL);
+			case 3:
+				listFriends(soap, serverURL);
 				break;
-			case 4: //Solicitud de amistad
-				error = sendReq(soap, serverURL);
+			case 4:
+				sendReq(soap, serverURL);
 				break;
-			case 5: // Ver solicitudes
-				error = listReq(soap, serverURL);
+			case 5:
+				listReq(soap, serverURL);
 				break;
-			case 6: // Aceptar solicitud
-				error = acceptReq(soap, serverURL);
+			case 6:
+				acceptReq(soap, serverURL);
 				break;
-			case 7: //Baja
-				q = deleteUser(soap, serverURL);
+			case 7:
+				deleteFriend(soap, serverURL);
 				break;
 			case 8:
-				q = deleteFriend(soap, serverURL);
+				loop = deleteUser(soap, serverURL);
 				break;
-			case 0: //Salir
-				q = logout(soap, serverURL);
+			case 0:
+				loop = logout(soap, serverURL);
 				break;
 			default:
 				printf("Opcion no valida, vuelve a intentarlo\n");
@@ -478,7 +476,7 @@ int main(int argc, char **argv){
 
 	// Usage
 	if (argc != 2) {
-		printf("Usage: %s http://server:port message\n",argv[0]);
+		printf("Usage: %s http://server:port\n",argv[0]);
 		exit(0);
 	}
 	// Init gSOAP environment
