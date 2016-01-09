@@ -276,11 +276,77 @@ int rmFriend(User* user, char* friendname) {
 
 int printUser(User* user){
 	printf("Nombre: %s pass: %s logueado: %d numFriends: %d numEnviados %d numPendientes %d\n", user->username, user->password, user->logged, user->numFriends, user->numSend, user->numPending);
-	
+
 /*
 	char* friends[MAXFRIENDS];//friends who accepted your friendship request
 	char* friends_request_send[MAXFRIENDS];//friends that you've sent friendship request
 	char* friends_request_pending[MAXFRIENDS];//friends who have sent friendship request to you
 	*/
 }
+int copyToFile(FILE* file,char* friends[MAXFRIENDS],int num) {
+	if(num > 0) {
+		char* aux;
+		int i;
+		for(i = 0; i < MAXFRIENDS; i++) {
+			aux = friends[i];
+			if(aux != NULL) {
+				fprintf(file,"%s\n",aux);
+			}
+		}
+	}
+	return 0;
+}
+int readAllFile(User* usr,char* friendname,int num,char* result)
+{
+	/*
+	size_t needed = snprintf(NULL, 0, "%s: %s (%d)", msg, strerror(errno), errno);
+	    char  *buffer = malloc(needed);
+	    snprintf(buffer, needed, "%s: %s (%d)", msg, strerror(errno), errno);
+	*/
+	char *script;
+	//int size = snprintf(NULL,0,"cat %s%s/%s | tail -n %d > %s%s/.temp",DATA_PATH,usr->nick,friend_nick,num,DATA_PATH,usr->nick);
+	script = (char*)malloc(256*sizeof(char));
+	sprintf(script,"cat %s%s/%s | tail -n %d > %s%s/.temp",DATA_PATH,usr->username,friendname,num,DATA_PATH,usr->username);
+	system(script);
 
+
+	char *path;
+	//size = snprintf(NULL,0,"%s%s/.temp",DATA_PATH,usr->nick);
+	path = (char*)malloc(256*sizeof(char));
+	sprintf(path,"%s%s/.temp",DATA_PATH,usr->username);
+	FILE *file;
+	if((file = fopen(path, "r")) == NULL) perror("Error abriendo fichero");
+	if(DEBUG_MODE) printf("readDownTo -> Fichero abierto\n");
+	char* aux = (char*)malloc(256*sizeof(char));
+
+	strcpy(result,"");
+
+	while(!feof(file))
+	{
+		if(fgets(aux,255,file) != NULL)
+		{
+			//name[strlen(name)-1] = '\0';
+			//if(DEBUG_MODE) printf("readDownTo -> Fichero linea %s\n",aux);
+			//sprintf(result,"%s%s\n",result,aux);
+			strcat(result,aux);
+			//if(DEBUG_MODE) printf("readDownTo -> Result %s\n",result);
+		}
+	}
+	free(aux);
+
+	if(fclose(file) == -1) perror("Error cerrando fichero");
+
+	char *script2;
+	//size = snprintf(NULL,0,"rm %s%s/.temp",DATA_PATH,usr->nick);
+	script2 = (char*)malloc(256*sizeof(char));
+	sprintf(script2,"rm %s%s/.temp",DATA_PATH,usr->username);
+
+	system(script2);
+	free(script);
+	free(path);
+	free(script2);
+
+	printf("Leyendo archivo de conversaciones %s\n",result);
+
+	return 0;
+}

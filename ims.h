@@ -13,18 +13,13 @@ struct Message{
 	int operation;
 };
 
-typedef struct
-{
-	char* str;
-}String;
-
 struct Char_vector {
 	char* data[100];
 };
 
 
 int ims__sendMessage (char *username, struct Message myMessage, int *error);
-//int ims__receiveMessage(char* user, char* friendname, int numMensajes, Message *myMessage);
+int ims__receiveMessage(char* username, char* friendname, int numMensajes,struct Message *myMessage);
 int ims__login(char* username, char* password, int *error);
 int ims__registerUser(char* username, char* password, int *error);
 int ims__deleteUser(char* username, int *error);
