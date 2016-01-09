@@ -313,9 +313,6 @@ int makeReq(char* username, char* friendname){
 		FILE *file;
 		char path[100];
 		sprintf(path,"%s%s/enviados",DATA_PATH,username);
-
-		if(DEBUG_MODE) printf("ims__sendFriendshipRequiest -> Path: %s\n",path);
-
 		if((file = fopen(path, "a")) == NULL)
 			perror("El fichero no existe");
 		// Añadir al amigo en el fichero enviados
@@ -327,9 +324,6 @@ int makeReq(char* username, char* friendname){
 		// Insertar usuario en la lista de solicitudes pendientes del amigo
 		if(deliverReqPending(friend, username) == 0) {
 			sprintf(path,"%s%s/pendientes",DATA_PATH,friendname);
-
-			if(DEBUG_MODE) printf("ims__sendFriendshipRequiest -> Path: %s\n",path);
-
 			if((file = fopen(path, "a")) == NULL)
 				perror("El fichero no existe");
 	
@@ -339,7 +333,7 @@ int makeReq(char* username, char* friendname){
 			if(fclose(file) == -1)
 				perror("El fichero no existe");
 
-			if(DEBUG_MODE && friend != NULL) printf("ims__sendFriendshipRequiest -> %s envia peticion de amistad a %s\n",usr->username,friend->username);
+			if(friend != NULL) printf("%s envio una peticion de amistad a %s\n",usr->username,friend->username);
 		}
 	}
 	else 
@@ -389,19 +383,7 @@ int acceptReq(char *username, char *friendname) {
 	
 }
 
-int copyToFile(FILE* file,char* friends[MAXFRIENDS],int num) {
-	if(num > 0) {
-		char* aux;
-		int i;
-		for(i = 0; i < MAXFRIENDS; i++) {
-			aux = friends[i];
-			if(aux != NULL) {
-				fprintf(file,"%s\n",aux);
-			}
-		}
-	}
-	return 0;
-}
+
 				
 int getFriendRequestsPending(User* usr,char* friends[MAX_FRIENDS])
 {
@@ -427,7 +409,6 @@ int getFriendRequestsPending(User* usr,char* friends[MAX_FRIENDS])
 
 int haveReqs(char* user){
 	User *usr = getUser(user);
-	printf("peta aqui");
 	if(usr->logged == 1)
 		return usr->numPending;
 	return -1;
@@ -439,9 +420,10 @@ int getReqs(char* user, struct Char_vector *friends){
 	if(usr->logged == 1)
 	{
 		getFriendRequestsPending(usr,friends->data);
-		if(DEBUG_MODE)
-			printf("ims__getFriendshipRequiests -> %s quiere su lista de peticiones pendientes\n",usr->username);
+		printf("Enviando lista de peticiones de amistad de: %s\n",usr->username);
+		return 0;
 	}
+	return -1;
 }
 
 /* FIN */
@@ -602,7 +584,7 @@ int getFriends(char* username, struct Char_vector *friends){
 			}
 			return 0;
 			if(DEBUG_MODE)
-				printf("ims__getFriends -> %s quiere su lista de amigos\n",usr->username);
+				printf("Enviando lista de amigos de: %s \n",usr->username);
 		}
 
 		return -1;
@@ -612,11 +594,65 @@ int haveFriends(char* user){
 
 	if(usr->logged == 1)
 	{
+		printf("%s tiene %d amigos \n",usr->username, usr->numFriends);
 		return usr->numFriends;
 	}
 	else{
 		return -1;
 	}
+
+}
+
+int receiveMessage (char* user,int num,char* friendname,struct Message *myMessage){
+	User *usr = getUser(user);
+		if(DEBUG_MODE) printf("ims__receiveMessage -> getUser user Friend: %s\n",friendname);
+		User *friend = getUser(friendname);
+		if(DEBUG_MODE) printf("ims__receiveMessage -> getUser friend: \n");
+
+		if(strcmp(user,friendname) == 0){
+			return -3;
+		}
+
+		if(usr->logged == 1)
+		{
+			int is_friend = alreadyFriend(usr,friendname);
+			if(is_friend == 1)
+			{
+				//char path[100];
+				//sprintf(path,"%s%s/%s",DATA_PATH,user,myMessage->name);
+				//if(DEBUG_MODE) printf("ims__receiveMessage -> Path: %s\n",path);
+				/*
+				FILE *file;
+				int pos;
+				if(isFileOpen(usr,myMessage.name,&pos) == 0)
+				{
+					if((file = fopen(path, "a")) == NULL) perror("Error abriendo fichero");
+				}else
+				{
+					file = usr->files[pos]->file;
+				}
+				//sprintf(myMessage->msg,"%s\n%s",myMessage->msg,);
+				*/
+
+				if(DEBUG_MODE) printf("ims__receiveMessage -> Entrando en downTo: \n");
+
+				//char* result;
+				myMessage->msg = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
+				readAllFile(usr,friendname,num,myMessage->msg);
+
+				return 0;
+				//strcpy(myMessage->msg,result);
+				//myMessage->msg = result;
+				//free(result);
+			}else
+			{
+				return -2;// No es amigo
+			}
+		}else
+		{
+			return -1;// No esta online
+		}
+
 
 }
 
