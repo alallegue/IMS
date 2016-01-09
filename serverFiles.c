@@ -194,33 +194,29 @@ int addUser(char* username, char* password) {
 /* FIN */
 /* Conecta un usuario al servidor */
 int login(char* username, char* password) {
-	int found = 0;
-	int i = 0;
-	User *user;
-	while(i < numUsers && found == 0) {
-		if(strcmp(username, userlist[i]->username) == 0) {
-			found = 1;
-			user = userlist[i];
+	User *user = getUser(username);
+	if(user != NULL) {
+		// Comprobar que no estaba previamente logueado
+		if(user->logged == 1)
+			return -2;
+		// Si el usuario existe y las contraseñas coinciden, loguear al usuario
+		if(strcmp(password, user->password) == 0) {
+			user->logged = 1;
+			printf("Usuario %s logueado correctamente\n", username);
+			return 0;
 		}
-		i++;
 	}
-	// Si el usuario existe y las contraseñas coinciden, loguear al usuario
-	if(found == 1 && strcmp(password, user->password) == 0) {
-		user->logged = 1;
-		printf("Usuario %s logueado correctamente\n", username);
-		return 0;
-	}
-	
 	printf("Login fallido\n");
 	return -1;
 }
 
+/* FIN */
 /* Da de baja un usuario en el servidor, borrando toda su informacion */ 
 int deleteUser(char* username) {
 	int found = 0;
 	int i;
 	User *user;
-	// Eliminar usuario en memoria
+	// Eliminar usuario en memoria y recolocar la lista de usuarios
 	for(i = 0; i < numUsers; i++){
 		if(found == 0) {
 			if(strcmp(username, userlist[i]->username) == 0) {
@@ -238,19 +234,18 @@ int deleteUser(char* username) {
 	printf("Usuario %s eliminado de memoria\n", username);
 	
 	//Borrar el usuario de las listas de amigos
-	//AMIGOS SIN HACER
 	User *friend;
-	/*for(i = 0; i < MAX_USERS; i++){
+	for(i = 0; i < MAX_USERS; i++){
 		friend = userlist[i];
 		if(friend != NULL){
-			if(DEBUG_MODE) printf("removeUser ->%s le borra de amigos\n",friend->nick);
-			removeFriend(friend,nick);
-			if(DEBUG_MODE) printf("removeUser ->%s le borra de pendientes\n",friend->nick);
-			removeFriendRequestPending(friend,nick);
-			if(DEBUG_MODE) printf("removeUser ->%s le borra de enviados\n",friend->nick);
-			removeFriendRequestSend(friend,nick);
+			if(rmFriend(friend, username))
+				printf("%s borra de amigos a %s\n",friend->username, username);
+			if(deleteReqPending(friend, username))
+				printf("%s borra de pendientes a %s\n",friend->username, username);
+			if(deleteReqFriend(friend, username))
+				printf("%s borra de enviados a %s\n",friend->username, username);
 		}
-	}*/
+	}
 	
 	// Eliminar directorio de usuario
 	char path[50];
@@ -265,16 +260,8 @@ int deleteUser(char* username) {
 int logout(char* username){
 	int found = 0;
 	int i = 0;
-	User *user;
-	// Obtener el usuario
-	while(i < numUsers && found == 0){
-		if(strcmp(username, userlist[i]->username) == 0){
-			found = 1;
-			user = userlist[i];
-		}
-		i++;
-	}
-	// Marcar desconectado
+	User *user = getUser(username);
+	// Marcar desconectado, cerrar ficheros y liberar memoria
 	user->logged = 0;
 	closeFiles(user);
 	userFree(user);
@@ -356,10 +343,10 @@ int acceptReq(char *username, char *friendname) {
 				char path[100];
 				// Añadir un fichero con el nombre del amigo para cada usuario
 				sprintf(path, "touch %s%s/%s", DATA_PATH, username, friendname);
-				printf("    Creando fichero: %s\n",path);
+				printf("Creando fichero: %s\n",path);
 				system(path);
 				sprintf(path, "touch %s%s/%s", DATA_PATH, friendname, username);
-				printf("    Creando fichero: %s\n",path);
+				printf("Creando fichero: %s\n",path);
 				system(path);
 				printf("    %s y %s ahora son amigos\n",user->username,friend->username);
 			}

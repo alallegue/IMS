@@ -25,6 +25,11 @@ int login(struct soap soap, char *serverURL){
 	soap_call_ims__login(&soap, serverURL, "", un, pass, &res);
 
 	switch(res) {
+		case -2:
+			printf("Ya estas logueado en otra maquina\n");
+			free(un);
+			free(pass);
+			break;
 		case -1:
 			printf("Nombre de usuario o contraseña incorrectos\n");
 			free(un);
