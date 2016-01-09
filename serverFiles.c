@@ -581,4 +581,42 @@ int closeFiles(User* user) {
 	return 0;
 	
 }
+int getFriends(char* username, struct Char_vector *friends){
+	User *usr = getUser(username);
+		if(usr->logged == 1)
+		{
+			if(usr->numFriends > 0)
+			{
+				char* aux;
+				int i;
+
+				for(i = 0; i < MAX_FRIENDS; i++)
+				{
+					aux = usr->friends[i];
+					if(aux != NULL)
+					{
+						friends->data[i] = (char*)malloc(256*sizeof(char));
+						strcpy(friends->data[i],aux);
+					}
+				}
+			}
+			return 0;
+			if(DEBUG_MODE)
+				printf("ims__getFriends -> %s quiere su lista de amigos\n",usr->username);
+		}
+
+		return -1;
+}
+int haveFriends(char* user){
+	User *usr = getUser(user);
+
+	if(usr->logged == 1)
+	{
+		return usr->numFriends;
+	}
+	else{
+		return -1;
+	}
+
+}
 
