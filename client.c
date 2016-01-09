@@ -4,7 +4,6 @@
 #define DEBUG_MODE 1
 #define NUM_MESSAGES 5
 char *username, *password;
-int show_menu(struct soap soap, char *serverURL);
 
 /* FIN */
 /* Pedir al servidor iniciar sesion con un usuario existente */
@@ -46,7 +45,7 @@ int login(struct soap soap, char *serverURL){
 
 /* FIN */
 /* Pedir al servidor registrar un nuevo usuario */ 
-int registerUser(struct soap soap, char *serverURL) {
+void registerUser(struct soap soap, char *serverURL) {
 	char* un;
 	char* pass;
 	int res = 1;
@@ -77,8 +76,6 @@ int registerUser(struct soap soap, char *serverURL) {
 	}
 	free(un);
 	free(pass);
-	
-	return 0;
 }
 
 /* FIN */
@@ -116,52 +113,52 @@ int logout(struct soap soap,char* serverURL) {
 	return 0;
 }
 
-int sendMessage(struct soap soap,char *serverURL) {
+/* FIN */
+/* Envía un mensaje a un amigo */
+void sendMessage(struct soap soap,char *serverURL) {
 	struct Message myMessage;
 	myMessage.name = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
 	myMessage.msg = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
 	int error = 1;
-
-	system("clear");
-
+	
+	// Obtener amigo destinatario
 	printf("¿A quien vas a escribir? ");
 	scanf("%s", myMessage.name);
-
-	//espera a leer una linea entera
+	// Obtener el mensaje
 	printf("Escribe el mensaje:\n");
 	while(getchar() != '\n');
 	fgets(myMessage.msg, IMS_MAX_MSG_SIZE, stdin);
-
-	//limpiado de salto de linea
+	// Quitar el salto de línea
 	char *clean;
 	clean = strchr(myMessage.msg, '\n');
-	if (clean){
+	if (clean)
 		*clean = '\0';
-	}
-
+	// Enviar mensaje al servidor
 	soap_call_ims__sendMessage(&soap, serverURL, "", username, myMessage, &error);
-	
-	if(error == 0){
-		printf("Mensaje enviado con exito\n");
+	// Gestión de errores
+	switch(error) {
+		case 0:
+			printf("Mensaje enviado con exito\n");
+			break;
+		case 1:
+			printf("No hay conexion con el servidor\n\n");
+			break;
+		case -1:
+			printf("Solo puedes enviar mensajes a tus amigos\n");
+			break;
+		case -2:
+			printf("No estas online.\n");
+			break;
+		default:
+			break;
 	}
-	else if (error == 1){
-		printf("No hay conexion con el servidor\n\n");
-		return -1;
-	}
-	else if (error == -1){
-		printf("Solo puedes enviar mensajes a tus amigos\n");
-	}
-	else if (error == -2){
-		printf("No estas online.\n");
-	}
-
 	free(myMessage.name);
 	free(myMessage.msg);
 
-	return 0;
 }
 
-int readMessage(struct soap soap,char *serverURL) {
+/* Muestra la conversación con un amigo */
+void readMessage(struct soap soap,char *serverURL) {
 	struct Message myMessage;
 	myMessage.name = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
 	myMessage.msg = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
@@ -177,7 +174,6 @@ int readMessage(struct soap soap,char *serverURL) {
 	}
 	else if(myMessage.operation == 1){
 		printf("Hay un problema con la conexion\n");
-		return -1;
 	}
 	else if(myMessage.operation == -1){
 		printf("No estas conectado\n");
@@ -191,12 +187,11 @@ int readMessage(struct soap soap,char *serverURL) {
 	free(myMessage.name);
 	free(myMessage.msg);
 
-	return 0;
-
 }
 
+/* FIN */
 /* Envía una solicitud de amistad a otro usuario */
-int sendReq(struct soap soap, char *serverURL) {
+void sendReq(struct soap soap, char *serverURL) {
 	int error;
 	char* friendname=(char*)malloc(256*sizeof(char));
 	printf("Introduce el nombre de usuario a agregar: \n");
@@ -225,11 +220,11 @@ int sendReq(struct soap soap, char *serverURL) {
 			break;
 	}
 	free (friendname);
-	return 1;
 }
 
+/* FIN */
 /* Acepta una solicitud de amistad enviada por otro usuario */
-int acceptReq(struct soap soap,char *serverURL) {
+void acceptReq(struct soap soap,char *serverURL) {
 	char* friendname;
 	int res = 1;
 	
@@ -247,12 +242,14 @@ int acceptReq(struct soap soap,char *serverURL) {
 		if(res == 0)
 			printf("%s agregado a amigos\n", friendname);
 		else
-			printf("Algo ha fallado\n");
+			printf("No hay conexion con el servidor\n");
 	}
 	else if(ar == 'r') {
 		soap_call_ims__cancelReq(&soap, serverURL,"",username ,friendname,&res);
 		if(res == 0)
-			printf("Solicitud de %s rechazada\n", friendname); 
+			printf("Has rechazado la solicitud de %s\n", friendname);
+		else
+			printf("No hay conexion con el servidor\n");
 	}
 	else
 		printf("Operacion cancelada\n");
@@ -260,7 +257,7 @@ int acceptReq(struct soap soap,char *serverURL) {
 }
 
 /*Solicitar la lista de peticiones de amistad al servidor*/
-int listReq(struct soap soap, char *serverURL) {
+void listReq(struct soap soap, char *serverURL) {
 	struct Char_vector* friends = (struct Char_vector*)malloc(sizeof(struct Char_vector));
 	int i;
 	int numRequestPending = -2;
@@ -281,8 +278,6 @@ int listReq(struct soap soap, char *serverURL) {
 	}
 	else if(numRequestPending == -2){
 		printf("Error del servidor\n");
-		return -1;
-
 	}
 	else if(numRequestPending == -1){
 			printf("No estas online\n");
@@ -290,14 +285,12 @@ int listReq(struct soap soap, char *serverURL) {
 	else{
 		printf("No tienes peticiones de amistad\n");
 	}
-
 	free(friends);
 
-	printf("\n\n");
-	return 0;
 }
 
-int deleteFriend(struct soap soap, char* serverURL) {
+/* Borra a un amigo de la lista de amigos del usuario */
+void deleteFriend(struct soap soap, char* serverURL) {
 	char *friendname = (char*)malloc(256*sizeof(char));
 	int error = 1;
 	printf("Introduce el nombre del amigo que quieres borrar: \n");
@@ -307,11 +300,9 @@ int deleteFriend(struct soap soap, char* serverURL) {
 
 	if(error == 1){
 		printf("No hay conexion con el servidor\n");
-		return -1;
 	}
 	else if (error == -1){
 		printf("No estas conectado\n");
-		return -1;
 	}
 	else if(error == -2){
 		printf("Ese usuario no es tu amigo\n");
@@ -322,22 +313,20 @@ int deleteFriend(struct soap soap, char* serverURL) {
 	else if(error == 0){
 		printf("%s ya no es tu amigo\n", friendname);
 	}
-	return 0;
 }
+
 /*Solicita la lista de amigos al servidor*/
-int listFriends(struct soap soap, char *serverURL) {
+void listFriends(struct soap soap, char *serverURL) {
 	struct Char_vector* friends = (struct Char_vector*)malloc(sizeof(struct Char_vector));
 	int i;
 	int numFriends = -2;
 	//comprobar el numero de amigos
 	soap_call_ims__haveFriends(&soap, serverURL,"",username,&numFriends);
-	if(numFriends > 0)
-	{
+	if(numFriends > 0)	{
 		//si existe uno o mas amigos mostrar por pantalla la lista
 		soap_call_ims__getFriends(&soap, serverURL, "",username ,friends);
 
 		printf("Lista de amigos:\n");
-
 		for(i=0;i < 100;i++){
 			if(friends->data[i] != NULL){
 				printf("%d: %s\n",i,friends->data[i]);
@@ -351,60 +340,20 @@ int listFriends(struct soap soap, char *serverURL) {
 	else if (numFriends == -2){
 		//system("clear");
 		printf("Error del servidor\n");
-		return -1;
-
 	}
 	else if (numFriends == -1){
 		//system("clear");
 		printf("No estas conectado \n");
 	}
-
 	free(friends);
 
-	printf("\n\n");
-
-	return 0;
 }
 
-/* Menú de bienvenida. 
- * Es el primero que se muestra y solicita
- * al usuario crear una cuenta nueva o iniciar sesión con una ya creada*/
-int show_login(struct soap soap, char *serverURL) {
-	int sel;
-	int loop = 0;
-	
-	while(loop == 0) {
-		printf("	Bienvenido. Selecciona una opcion: \n");
-		printf("	1) Entrar\n");
-		printf("	2) Registrarse\n");
-		printf("	0) Salir\n");
 
-		scanf("%d", &sel);
-		system("clear");
-		switch(sel) {
-			case 1: //Login
-				//Si se loguea correctamente entrar al menú principal
-				if(login(soap, serverURL) == 0) 
-					show_menu(soap, serverURL);
-				break;
-			case 2: //Registro
-				registerUser(soap,serverURL);
-				break;
-			case 0:
-				printf("Adios!\n");
-				loop = 1;
-				break;
-			default:
-				break;
-		}
-	}
-
-	return 0;
-}
 
 /* Muestra el menú principal donde el usuario puede interactuar
  * con todas las funciones de la aplicación */
-int show_menu(struct soap soap, char *serverURL) {
+void show_menu(struct soap soap, char *serverURL) {
 	int sel;
 	int loop = 0;
 	
@@ -454,10 +403,41 @@ int show_menu(struct soap soap, char *serverURL) {
 				break;
 		}
 	}
-
-	return 0;
 }
 
+/* Menú de bienvenida. 
+ * Es el primero que se muestra y solicita
+ * al usuario crear una cuenta nueva o iniciar sesión con una ya creada*/
+void show_login(struct soap soap, char *serverURL) {
+	int sel;
+	int loop = 0;
+	
+	while(loop == 0) {
+		printf("	Bienvenido. Selecciona una opcion: \n");
+		printf("	1) Entrar\n");
+		printf("	2) Registrarse\n");
+		printf("	0) Salir\n");
+
+		scanf("%d", &sel);
+		system("clear");
+		switch(sel) {
+			case 1:
+				//Si se loguea correctamente entrar al menú principal
+				if(login(soap, serverURL) == 0) 
+					show_menu(soap, serverURL);
+				break;
+			case 2:
+				registerUser(soap,serverURL);
+				break;
+			case 0:
+				printf("Adios!\n");
+				loop = 1;
+				break;
+			default:
+				break;
+		}
+	}
+}
 
 /* FIN */
 int main(int argc, char **argv){

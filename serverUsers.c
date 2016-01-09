@@ -82,6 +82,7 @@ int deliverReqfriend(User* usr,char* friendname){
 		usr->numSend++;
 		//printf("%s\n",usr->friends[j]);
 	}
+	printf("Usuario %s ha enviado solicitud de amistad a %s\n", usr->username, friendname);
 	return found;
 }
 
@@ -113,6 +114,7 @@ int deliverReqPending(User* usr,char* friendname) {
 		usr->numPending++;
 		//printf("%s\n",usr->friends[j]);
 	}
+	printf("Usuario %s tiene solicitud pendiente de %s\n", usr->username, friendname);
 	return found;
 }
 
@@ -180,17 +182,15 @@ int deleteReqFriend(User* user,char* friendname) {
 		// Actualizar el fichero de solicitudes enviadas
 		char* path = (char*)malloc(256*sizeof(char));
 		sprintf(path,"%s%s%s/%s","rm ",DATA_PATH,user->username,"enviados");
-		if(DEBUG_MODE) printf("removeFriendshipRequestSend -> Borrando fichero enviados path: %s\n",path);
 		system(path);
 		sprintf(path,"%s%s/%s",DATA_PATH,user->username,"enviados");
 		FILE* file;
-		if(DEBUG_MODE) printf("removeFriendshipRequestSend -> Rescribiendo fichero enviados path: %s\n",path);
-
-		if((file = fopen(path, "w")) == NULL) perror("Error abriendo fichero");
-
+		if((file = fopen(path, "w")) == NULL) 
+			perror("Error abriendo fichero");
 		copyToFile(file,user->friends_request_send,user->numSend);
-
-		if(fclose(file) == -1) perror("Error cerrando fichero");
+		printf("Actualizado fichero: %s%s/%s\n", DATA_PATH, user->username, "enviados");
+		if(fclose(file) == -1) 
+			perror("Error cerrando fichero");
 		free(path);
 	}
 	return found;
@@ -225,22 +225,71 @@ int deleteReqPending(User* user,char* friendname) {
 		// Actualizar el fichero de solicitudes pendientes
 		char* path = (char*)malloc(256*sizeof(char));
 		sprintf(path,"%s%s%s/%s","rm ",DATA_PATH,user->username,"pendientes");
-		if(DEBUG_MODE) printf("removeFriendshipRequestSend -> Borrando fichero pendientes path: %s\n",path);
 		FILE* file;
 
 		sprintf(path,"%s%s/%s",DATA_PATH,user->username,"pendientes");
-		if(DEBUG_MODE) printf("removeFriendshipRequestSend -> Rescribiendo fichero pendientes path: %s\n",path);
-
-		if((file = fopen(path, "w")) == NULL) perror("Error abriendo fichero");
+		printf("Actualizado fichero: %s%s/%s\n", DATA_PATH, user->username, "pendientes");
+		
+		if((file = fopen(path, "w")) == NULL) 
+			perror("Error abriendo fichero");
 
 		copyToFile(file,user->friends_request_pending,user->numPending);
 
-		if(fclose(file) == -1) perror("Error cerrando fichero");
+		if(fclose(file) == -1) 
+			perror("Error cerrando fichero");
 
 		system(path);
 		free(path);
 	}
 	return found;
+}
+
+/* FIN */
+/* Descarta una petición de amistad de otro usuario */
+int deleteReq(char* username, char* friendname) {
+	User* user = getUser(username);
+	User* friend = getUser(friendname);
+
+	printf("Rechazar solicitud de amistad:\n");
+	//if(user->online == 1) {
+	if(deleteReqPending(user, friendname) == 1) {
+		if(deleteReqFriend(friend, username) == 1) {
+			// Borrar ficheros enviados y pendientes
+			char path[100];
+			sprintf(path,"%s%s%s/%s","rm ",DATA_PATH,username,"pendientes");
+			system(path);
+			printf("    Borrado fichero: %s\n",path);
+			sprintf(path,"%s%s%s/%s","rm ",DATA_PATH,friendname,"enviados");
+			system(path);
+			printf("    Borrado fichero: %s\n",path);
+			
+			// Volver a crear enviados y pendientes con las listas de ambos usuarios
+			FILE* file;
+			sprintf(path,"%s%s/%s",DATA_PATH,username,"pendientes");
+			printf("    Creado fichero: %s\n",path);
+
+			if((file = fopen(path, "w")) == NULL) 
+				perror("Error abriendo fichero");
+			// Rellenar pendientes del usuario
+			copyToFile(file,user->friends_request_pending, user->numPending);
+			if(fclose(file) == -1) 
+				perror("Error cerrando fichero");
+
+			sprintf(path,"%s%s/%s",DATA_PATH,friendname,"enviados");
+			printf("    Creado fichero: %s\n",path);
+
+			if((file = fopen(path, "w")) == NULL) 
+				perror("Error abriendo fichero");
+			// Rellenar enviados del amigo
+			copyToFile(file,friend->friends_request_send,friend->numSend);
+			if(fclose(file) == -1) perror("Error cerrando fichero");
+
+			printf("%s ha rechazado la solicitud de %s\n",username, friendname);
+		}
+	}
+	//}
+	
+	return 0;
 }
 
 /* MEJORAR */ 
@@ -274,15 +323,12 @@ int rmFriend(User* user, char* friendname) {
 	
 }
 
+/* Debug */
 int printUser(User* user){
-	printf("Nombre: %s pass: %s logueado: %d numFriends: %d numEnviados %d numPendientes %d\n", user->username, user->password, user->logged, user->numFriends, user->numSend, user->numPending);
-
-/*
-	char* friends[MAXFRIENDS];//friends who accepted your friendship request
-	char* friends_request_send[MAXFRIENDS];//friends that you've sent friendship request
-	char* friends_request_pending[MAXFRIENDS];//friends who have sent friendship request to you
-	*/
+	printf("Nombre: %s pass: %s logueado: %d numFriends: %d numEnviados %d numPendientes %d\n", 
+		user->username, user->password, user->logged, user->numFriends, user->numSend, user->numPending);
 }
+
 int copyToFile(FILE* file,char* friends[MAXFRIENDS],int num) {
 	if(num > 0) {
 		char* aux;
@@ -296,6 +342,7 @@ int copyToFile(FILE* file,char* friends[MAXFRIENDS],int num) {
 	}
 	return 0;
 }
+
 int readAllFile(User* usr,char* friendname,int num,char* result)
 {
 	/*
