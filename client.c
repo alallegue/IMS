@@ -2,9 +2,9 @@
 #include "imsService.nsmap"
 
 #define DEBUG_MODE 1
-
+#define NUM_MESSAGES 5
 char *username, *password;
-
+int show_menu(struct soap soap, char *serverURL);
 
 /* FIN */
 /* Pedir al servidor iniciar sesion con un usuario existente */
@@ -162,45 +162,38 @@ int sendMessage(struct soap soap,char *serverURL) {
 }
 
 int readMessage(struct soap soap,char *serverURL) {
-	/*
-	system("clear");
-
 	struct Message myMessage;
 	myMessage.name = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
 	myMessage.msg = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
-	myMessage.error = 1;
+	myMessage.operation = 1;
 
 	printf("Escriba el nombre de su amigo: ");
 	scanf("%s", myMessage.name);
 
 	soap_call_ims__receiveMessage(&soap,serverURL,"", username,myMessage.name,NUM_MESSAGES,&myMessage);
 
-	if(myMessage.error == 0){
+	if(myMessage.operation == 0){
 		printf("%s\n",myMessage.msg);
 	}
-	else if(myMessage.error == 1){
+	else if(myMessage.operation == 1){
 		printf("Hay un problema con la conexion\n");
 		return -1;
 	}
-	else if(myMessage.error == -1){
+	else if(myMessage.operation == -1){
 		printf("No estas conectado\n");
 	}
-	else if(myMessage.error == -2){
+	else if(myMessage.operation == -2){
 		printf("Ese no es tu amigo\n");
 	}
-	else if(myMessage.error == -3){
+	else if(myMessage.operation == -3){
 		printf("No puedes leer mensajes de ti mismo, buscate un amigo\n");
 	}
-
-
-
 	free(myMessage.name);
 	free(myMessage.msg);
 
 	return 0;
-	*/
-}
 
+}
 
 /* Envía una solicitud de amistad a otro usuario */
 int sendReq(struct soap soap, char *serverURL) {
@@ -266,15 +259,17 @@ int acceptReq(struct soap soap,char *serverURL) {
 	 
 }
 
-
+/*Solicitar la lista de peticiones de amistad al servidor*/
 int listReq(struct soap soap, char *serverURL) {
 	struct Char_vector* friends = (struct Char_vector*)malloc(sizeof(struct Char_vector));
 	int i;
 	int numRequestPending = -2;
+	//comprobar si existe alguna peticion
 	soap_call_ims__haveFriendshipRequest(&soap, serverURL,"",username,&numRequestPending);
-	printf("numero de peticiones: %d", numRequestPending);
+	printf("numero de peticiones: %d\n", numRequestPending);
 	if(numRequestPending > 0)
 	{
+		//si existen peticiones, imprimirlas por pantalla
 		soap_call_ims__getFriendshipRequests(&soap, serverURL, "",username ,friends);
 		printf("Lista de amistades sin aceptar:\n");
 
@@ -285,7 +280,7 @@ int listReq(struct soap soap, char *serverURL) {
 		}
 	}
 	else if(numRequestPending == -2){
-		printf("Hay un problema con la conexion\n");
+		printf("Error del servidor\n");
 		return -1;
 
 	}
@@ -293,7 +288,6 @@ int listReq(struct soap soap, char *serverURL) {
 			printf("No estas online\n");
 	}
 	else{
-		system("clear");
 		printf("No tienes peticiones de amistad\n");
 	}
 
@@ -330,20 +324,18 @@ int deleteFriend(struct soap soap, char* serverURL) {
 	}
 	return 0;
 }
-
-
-
+/*Solicita la lista de amigos al servidor*/
 int listFriends(struct soap soap, char *serverURL) {
 	struct Char_vector* friends = (struct Char_vector*)malloc(sizeof(struct Char_vector));
 	int i;
 	int numFriends = -2;
+	//comprobar el numero de amigos
 	soap_call_ims__haveFriends(&soap, serverURL,"",username,&numFriends);
 	if(numFriends > 0)
 	{
-
+		//si existe uno o mas amigos mostrar por pantalla la lista
 		soap_call_ims__getFriends(&soap, serverURL, "",username ,friends);
 
-		system("clear");
 		printf("Lista de amigos:\n");
 
 		for(i=0;i < 100;i++){
@@ -354,17 +346,17 @@ int listFriends(struct soap soap, char *serverURL) {
 	}else if (numFriends == 0)
 	{
 		//system("clear");
-		printf("¡No tienes amigos!\n");
+		printf("No se encontro nigun amigo :S\n");
 	}
 	else if (numFriends == -2){
 		//system("clear");
-		printf("Hay un problema con la conexion\n");
+		printf("Error del servidor\n");
 		return -1;
 
 	}
 	else if (numFriends == -1){
 		//system("clear");
-		printf("No estas online\n");
+		printf("No estas conectado \n");
 	}
 
 	free(friends);
@@ -427,7 +419,6 @@ int show_menu(struct soap soap, char *serverURL) {
 		printf("	7) Borrar amigo\n");
 		printf("	8) Dar de baja esta cuenta\n");
 		printf("	0) Salir\n");
-		
 		scanf("%d", &sel);
 		system("clear");
 		switch(sel) {
@@ -463,7 +454,7 @@ int show_menu(struct soap soap, char *serverURL) {
 				break;
 		}
 	}
-	
+
 	return 0;
 }
 

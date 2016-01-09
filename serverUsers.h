@@ -43,5 +43,6 @@ int deleteReqPending(User* user, char* friendname);
 
 int rmFriend(User* user, char* friendname);
 int printUser(User* user);
-
+int writeToFile(FILE* file, char* friends[MAXFRIENDS], int num);
+int readAllFile(User* usr,char* friend_nick,int num,char* result);
 #endif

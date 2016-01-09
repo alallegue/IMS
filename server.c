@@ -51,12 +51,12 @@ int ims__sendMessage (struct soap *soap, char* username, struct Message myMessag
 	return SOAP_OK;
 }
 
-/*
-int ims__receiveMessage(struct soap *soap, char* user, char* friendname, int numMensajes, struct Message *myMessage) {
 
+int ims__receiveMessage(struct soap *soap, char* username, char* friendname, int numMensajes, struct Message *myMessage) {
+	myMessage->operation=receiveMessage(username,numMensajes, friendname, myMessage);
 	return SOAP_OK;
 }
-*/
+
 
 int ims__registerUser(struct soap *soap, char* username, char* password, int *error) {
 	*error = addUser(username, password);
@@ -90,7 +90,6 @@ int ims__haveFriendshipRequest(struct soap *soap, char* user,int *result)
 }
 int ims__getFriendshipRequests(struct soap *soap, char* user,struct Char_vector *friends)
 {
-	printf("llego la peticion");
 	getReqs(user,friends);
 	return SOAP_OK;
 }
