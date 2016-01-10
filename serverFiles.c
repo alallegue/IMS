@@ -206,7 +206,7 @@ int login(char* username, char* password) {
 			return 0;
 		}
 	}
-	printf("Login fallido\n");
+	printf("No se encuentra el usuario: %s\n", username);
 	return -1;
 }
 
@@ -256,6 +256,7 @@ int deleteUser(char* username) {
 	return 0;
 }
 
+/* FIN */
 /* Desconecta al usuario del servidor */
 int logout(char* username){
 	int found = 0;
@@ -264,7 +265,7 @@ int logout(char* username){
 	// Marcar desconectado, cerrar ficheros y liberar memoria
 	user->logged = 0;
 	closeFiles(user);
-	userFree(user);
+	//userFree(user);
 	printf("Usuario %s desconectado\n", username);
 	
 	return 0;
@@ -402,37 +403,29 @@ int getReqs(char* user, struct Char_vector *friends){
 }
 
 /* FIN */
+/* Borra un amigo de la lista de amistad */
 int deleteFriend(char* username, char* friendname) {
 	User* user = getUser(username);
 	
 	printf("%s va a borrar al amigo %s\n", username, friendname);
-	
-	//if(strcmp(user,friendname) == 0){
-		//return -3; 
-	//}
-	//if(user->logged == 1)
-	//{
-		// Obtener el usuario amigo y borrar de la lista de amigos de ambos usuarios
-		if(alreadyFriend(user, friendname) == 1) {
-			User *friend = getUser(friendname);
-			rmFriend(user, friendname);
-			rmFriend(friend, username);
-		}
-		// No encontrado
-		else {
-			printf("No son amigos\n");
-			return -2;
-		}
-	//}else
-	//{
-		//return = -1;
-	//}
+	// Obtener el usuario amigo y borrar de la lista de amigos de ambos usuarios
+	if(alreadyFriend(user, friendname) == 1) {
+		User *friend = getUser(friendname);
+		rmFriend(user, friendname);
+		rmFriend(friend, username);
+	}
+	// No encontrado
+	else {
+		printf("%s y %s no eran amigos\n", username, friendname);
+		return -2;
+	}
 	
 	printf("%s ha borrado a %s\n", username, friendname);
 	
 	return 0;
 }
 
+/* username envía el mensaje myMessage.msg al usuario myMessage.name */
 int sendMessage(char *username, struct Message myMessage) {
 	User* user = getUser(username);
 	User* friend = getUser(myMessage.name);

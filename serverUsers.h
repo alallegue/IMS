@@ -31,7 +31,7 @@ typedef struct {
 
 
 User* userInit(char* username, char* password);
-int userFree(User* user);
+void userFree(User* user);
 
 int alreadyFriend(User* usr,char *friendname);
 int deliverReqfriend(User* usr,char* friendname);
