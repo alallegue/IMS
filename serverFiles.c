@@ -288,7 +288,7 @@ int makeReq(char* username, char* friendname){
 	if(friend->numFriends == MAXFRIENDS)
 		return -6;
 	// Comprobar que el amigo no este en la lista de amigos	
-	if(alreadyFriend(usr,friendname) == 1)
+	if(alreadyFriend(usr,friendname) >= 0)
 		return -4;
 	// Insertar amigo en la lista de solicitudes pendientes	
 	if(deliverReqfriend(usr, friendname) == 0) {
@@ -414,7 +414,7 @@ int deleteFriend(char* username, char* friendname) {
 	
 	printf("%s va a borrar al amigo %s\n", username, friendname);
 	// Obtener el usuario amigo y borrar de la lista de amigos de ambos usuarios
-	if(alreadyFriend(user, friendname) == 1) {
+	if(alreadyFriend(user, friendname) >= 0) {
 		User *friend = getUser(friendname);
 		rmFriend(user, friendname);
 		rmFriend(friend, username);
@@ -434,11 +434,9 @@ int deleteFriend(char* username, char* friendname) {
 int sendMessage(char *username, struct Message myMessage) {
 	User* user = getUser(username);
 	User* friend = getUser(myMessage.name);
-	int is_friend = 0;
 	printf("Usuario %s manda mensaje a %s\n", username, myMessage.name);
 	if(user->logged == 1) {
-		is_friend = alreadyFriend(user, myMessage.name);
-		if(is_friend == 1) {
+		if(alreadyFriend(user, myMessage.name) >= 0) {
 			char path[100];
 			// Obtener la ruta del usuario con el fichero amigo
 			sprintf(path, "%s%s/%s", DATA_PATH, username, myMessage.name);
@@ -480,6 +478,10 @@ int sendMessage(char *username, struct Message myMessage) {
 			fprintf(file,"%s : %s\n", username, myMessage.msg);
 			fflush(file);
 			printf("Escrito mensaje en el fichero %s\n", path);
+			
+			// Doublecheck
+			friend->doublecheck[pos]++;
+			printf("%s tiene %d mensajes sin leer de %s\n", friend->username, friend->doublecheck[pos], username);
 			
 			return 0;
 		}
@@ -535,32 +537,29 @@ int closeFiles(User* user) {
 	return 0;
 	
 }
+
+
 int getFriends(char* username, struct Char_vector *friends){
-	User *usr = getUser(username);
-		if(usr->logged == 1)
-		{
-			if(usr->numFriends > 0)
-			{
-				char* aux;
-				int i;
+	User *user = getUser(username);
+	if(user->numFriends > 0) {
+		char* aux;
+		int i;
 
-				for(i = 0; i < MAX_FRIENDS; i++)
-				{
-					aux = usr->friends[i];
-					if(aux != NULL)
-					{
-						friends->data[i] = (char*)malloc(256*sizeof(char));
-						strcpy(friends->data[i],aux);
-					}
-				}
+		for(i = 0; i < MAX_FRIENDS; i++) {
+			aux = user->friends[i];
+			if(aux != NULL)	{
+				friends->data[i] = (char*)malloc(256*sizeof(char));
+				strcpy(friends->data[i],aux);
+				friends->msgcheck[i] = user->doublecheck[i];
 			}
-			return 0;
-			if(DEBUG_MODE)
-				printf("Enviando lista de amigos de: %s \n",usr->username);
 		}
-
-		return -1;
+	}
+	return 0;
+	
+	printf("Enviando lista de amigos de: %s \n", username);
 }
+
+
 int haveFriends(char* user){
 	User *usr = getUser(user);
 
@@ -577,53 +576,31 @@ int haveFriends(char* user){
 
 int receiveMessage (char* user,int num,char* friendname,struct Message *myMessage){
 	User *usr = getUser(user);
-		if(DEBUG_MODE) printf("ims__receiveMessage -> getUser user Friend: %s\n",friendname);
-		User *friend = getUser(friendname);
-		if(DEBUG_MODE) printf("ims__receiveMessage -> getUser friend: \n");
+	User *friend = getUser(friendname);
+	printf("Leer mensajes de %s\n",friendname);
 
-		if(strcmp(user,friendname) == 0){
-			return -3;
-		}
-
-		if(usr->logged == 1)
-		{
-			int is_friend = alreadyFriend(usr,friendname);
-			if(is_friend == 1)
-			{
-				//char path[100];
-				//sprintf(path,"%s%s/%s",DATA_PATH,user,myMessage->name);
-				//if(DEBUG_MODE) printf("ims__receiveMessage -> Path: %s\n",path);
-				/*
-				FILE *file;
-				int pos;
-				if(isFileOpen(usr,myMessage.name,&pos) == 0)
-				{
-					if((file = fopen(path, "a")) == NULL) perror("Error abriendo fichero");
-				}else
-				{
-					file = usr->files[pos]->file;
-				}
-				//sprintf(myMessage->msg,"%s\n%s",myMessage->msg,);
-				*/
-
-				if(DEBUG_MODE) printf("ims__receiveMessage -> Entrando en downTo: \n");
-
-				//char* result;
-				myMessage->msg = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
-				readAllFile(usr,friendname,num,myMessage->msg);
-
-				return 0;
-				//strcpy(myMessage->msg,result);
-				//myMessage->msg = result;
-				//free(result);
-			}else
-			{
-				return -2;// No es amigo
-			}
+	if(strcmp(user,friendname) == 0){
+		return -3;
+	}
+	if(usr->logged == 1) {
+		int friendpos = alreadyFriend(usr,friendname);
+		if(friendpos >= 0) {
+			myMessage->msg = (xsd__string) malloc (IMS_MAX_MSG_SIZE);
+			readAllFile(usr,friendname,num,myMessage->msg);
+			
+			// Doublecheck
+			usr->doublecheck[friendpos] = 0;
+			printf("%s tiene %d mensajes sin leer de %s\n", user, usr->doublecheck[friendpos], friendname);
+			
+			return 0;
 		}else
 		{
-			return -1;// No esta online
+			return -2;// No es amigo
 		}
+	}else
+	{
+		return -1;// No esta online
+	}
 
 
 }

@@ -18,12 +18,15 @@ User* userInit(char* username,char* password){
 		user->files[i] = (struct Files*)malloc(sizeof(struct Files));
 		user->files[i]->file = NULL;
 		user->files[i]->friendname = NULL;
+		
+		user->doublecheck[i] = NULL;
 	}
 
 	user->logged = 0;
 	user->numFriends = 0;
 	user->numSend = 0;
 	user->numPending = 0;
+
 
 	return user;
 }
@@ -53,7 +56,9 @@ void userFree(User* user) {
 }
 
 /* FIN */
-/* Comprueba si el usuario ya tiene al amigo agregado en la lista de amigos */
+/* Comprueba si el usuario ya tiene al amigo agregado en la lista de amigos 
+ * Devuelve la posición del amigo en la lista de amigos si se encuentra en ella
+ * ó -1 si no está */
 int alreadyFriend(User* user,char *friendname){
 	int found = 0;
 	int i = 0;
@@ -68,7 +73,11 @@ int alreadyFriend(User* user,char *friendname){
 		}
 		i++;
 	}
-	return found;
+	if(found == 1)
+		return --i;
+	else
+		return -1;
+		
 }
 
 /* FIN */
@@ -359,48 +368,33 @@ int copyToFile(FILE* file,char* friends[MAXFRIENDS],int num) {
 	return 0;
 }
 
-int readAllFile(User* usr,char* friendname,int num,char* result)
-{
-	/*
-	size_t needed = snprintf(NULL, 0, "%s: %s (%d)", msg, strerror(errno), errno);
-	    char  *buffer = malloc(needed);
-	    snprintf(buffer, needed, "%s: %s (%d)", msg, strerror(errno), errno);
-	*/
+int readAllFile(User* usr,char* friendname,int num,char* result) {
+	printf("Leer %d mensajes del fichero de conversacion entre %s y %s\n", num, usr->username, friendname);
 	char *script;
-	//int size = snprintf(NULL,0,"cat %s%s/%s | tail -n %d > %s%s/.temp",DATA_PATH,usr->nick,friend_nick,num,DATA_PATH,usr->nick);
 	script = (char*)malloc(256*sizeof(char));
 	sprintf(script,"cat %s%s/%s | tail -n %d > %s%s/.temp",DATA_PATH,usr->username,friendname,num,DATA_PATH,usr->username);
 	system(script);
 
-
 	char *path;
-	//size = snprintf(NULL,0,"%s%s/.temp",DATA_PATH,usr->nick);
 	path = (char*)malloc(256*sizeof(char));
 	sprintf(path,"%s%s/.temp",DATA_PATH,usr->username);
 	FILE *file;
 	if((file = fopen(path, "r")) == NULL) perror("Error abriendo fichero");
-	if(DEBUG_MODE) printf("readDownTo -> Fichero abierto\n");
 	char* aux = (char*)malloc(256*sizeof(char));
 
 	strcpy(result,"");
 
-	while(!feof(file))
-	{
-		if(fgets(aux,255,file) != NULL)
-		{
-			//name[strlen(name)-1] = '\0';
-			//if(DEBUG_MODE) printf("readDownTo -> Fichero linea %s\n",aux);
-			//sprintf(result,"%s%s\n",result,aux);
+	while(!feof(file)) {
+		if(fgets(aux,255,file) != NULL)	{
 			strcat(result,aux);
-			//if(DEBUG_MODE) printf("readDownTo -> Result %s\n",result);
 		}
 	}
 	free(aux);
 
-	if(fclose(file) == -1) perror("Error cerrando fichero");
+	if(fclose(file) == -1) 
+		perror("Error cerrando fichero");
 
 	char *script2;
-	//size = snprintf(NULL,0,"rm %s%s/.temp",DATA_PATH,usr->nick);
 	script2 = (char*)malloc(256*sizeof(char));
 	sprintf(script2,"rm %s%s/.temp",DATA_PATH,usr->username);
 
@@ -409,7 +403,7 @@ int readAllFile(User* usr,char* friendname,int num,char* result)
 	free(path);
 	free(script2);
 
-	printf("Leyendo archivo de conversaciones %s\n",result);
+	printf("Obtenida conversacion\n");
 
 	return 0;
 }
