@@ -26,6 +26,8 @@ typedef struct {
 	char* friends[MAXFRIENDS];//friends who accepted your friendship request
 	char* friends_request_send[MAXFRIENDS];//friends that you've sent friendship request
 	char* friends_request_pending[MAXFRIENDS];//friends who have sent friendship request to you
+	
+	int doublecheck[MAXFRIENDS];
 
 }User;
 

@@ -15,6 +15,7 @@ struct Message{
 
 struct Char_vector {
 	char* data[100];
+	int msgcheck[100];
 };
 
 

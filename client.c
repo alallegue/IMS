@@ -333,7 +333,7 @@ void listFriends(struct soap soap, char *serverURL) {
 		printf("Lista de amigos:\n");
 		for(i=0;i < 100;i++){
 			if(friends->data[i] != NULL){
-				printf("%d: %s\n",i,friends->data[i]);
+				printf("%s (%d)\n", friends->data[i], friends->msgcheck[i]);
 			}
 		}
 	}else if (numFriends == 0)
