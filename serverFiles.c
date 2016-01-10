@@ -332,8 +332,8 @@ int acceptReq(char *username, char *friendname) {
 	User *user = getUser(username);
 	User *friend = getUser(friendname);
 	
-	if(user->logged == 1) {
-		printf("Aceptar solicitud de %s a %s\n:", username, friendname);
+	printf("Aceptar solicitud de %s a %s:\n", username, friendname);
+	if(user != NULL && friend != NULL) {
 		// Eliminar la solicitud pendiente del usuario
 		if(deleteReqPending(user,friendname) == 1) {
 			// Eliminar la solicitud enviada del amigo
@@ -341,6 +341,9 @@ int acceptReq(char *username, char *friendname) {
 				// Añadir cada usuario a su lista de amigos
 				addFriend(user, friendname);
 				addFriend(friend, user->username);
+				// Eliminar solicitudes de ambos usuarios
+				deleteReqPending(friend, username);
+				deleteReqFriend(user, friendname);
 				char path[100];
 				// Añadir un fichero con el nombre del amigo para cada usuario
 				sprintf(path, "touch %s%s/%s", DATA_PATH, username, friendname);
@@ -353,8 +356,10 @@ int acceptReq(char *username, char *friendname) {
 			}
 		}
 	}
-	else
-		return -1;
+	else {
+		printf("Usuario no valido\n");
+		return -2;
+	}
 	return 0;
 	
 }

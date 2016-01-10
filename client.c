@@ -246,6 +246,8 @@ void acceptReq(struct soap soap,char *serverURL) {
 		soap_call_ims__acceptReq(&soap, serverURL,"",username,friendname,&res);
 		if(res == 0)
 			printf("%s agregado a amigos\n", friendname);
+		else if(res == -2)
+			printf("Usuario no valido\n");
 		else
 			printf("No hay conexion con el servidor\n");
 	}
@@ -350,8 +352,6 @@ void listFriends(struct soap soap, char *serverURL) {
 	free(friends);
 
 }
-
-
 
 /* Muestra el menú principal donde el usuario puede interactuar
  * con todas las funciones de la aplicación */

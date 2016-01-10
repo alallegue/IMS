@@ -1,4 +1,3 @@
-
 #include "soapH.h"
 #include "imsService.nsmap"
 #include <stdio.h>
@@ -8,11 +7,27 @@
 #include <signal.h>
 #include "serverFiles.h"
 
-#define DEBUG_MODE 1
+// Concurrencia 
+pthread_mutex_t mutex;
+
+void *serve_clients(struct soap *soap){
+	struct soap *aux_soap = soap_copy(soap);
+
+	pthread_mutex_lock (&mutex);
+  	soap_serve(aux_soap);
+	pthread_mutex_unlock (&mutex);
+	soap_end(aux_soap);
+
+}
 
 int main(int argc, char **argv){ 
 	int m, s;
 	struct soap soap;
+	struct soap soap_aux;
+	
+	pthread_t idHilo;
+	pthread_mutex_init (&mutex, NULL);
+	
   	if (argc < 2) {
     	printf("Usage: %s <port>\n",argv[0]); 
 		exit(-1); 
@@ -36,13 +51,20 @@ int main(int argc, char **argv){
 	  	if (s < 0) {
 			soap_print_fault(&soap, stderr); exit(-1);
 	  	}
+	  	
+	  	// Concurrencia
+	  	soap_aux = soap;
+	  	pthread_create (&idHilo, NULL, serve_clients, &soap_aux);
+	  	
 		// Execute invoked operation
 	  	soap_serve(&soap);
 		// Clean up!
 	  	soap_end(&soap);
 	}
-
-  return 0;
+	
+	pthread_mutex_destroy(&mutex);
+	//serverFree();
+	return 0;
 }
 
 
