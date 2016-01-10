@@ -246,6 +246,8 @@ void acceptReq(struct soap soap,char *serverURL) {
 		soap_call_ims__acceptReq(&soap, serverURL,"",username,friendname,&res);
 		if(res == 0)
 			printf("%s agregado a amigos\n", friendname);
+		else if(res == -2)
+			printf("Usuario no valido\n");
 		else
 			printf("No hay conexion con el servidor\n");
 	}
@@ -312,9 +314,6 @@ void deleteFriend(struct soap soap, char* serverURL) {
 	else if(error == -2){
 		printf("Ese usuario no es tu amigo\n");
 	}
-	//else if(error == -3){
-		//printf("No puedes borrarte a ti mismo de amigos\n");
-	//}
 	else if(error == 0){
 		printf("%s ya no es tu amigo\n", friendname);
 	}
@@ -353,8 +352,6 @@ void listFriends(struct soap soap, char *serverURL) {
 	free(friends);
 
 }
-
-
 
 /* Muestra el menú principal donde el usuario puede interactuar
  * con todas las funciones de la aplicación */

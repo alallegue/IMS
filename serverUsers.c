@@ -28,22 +28,40 @@ User* userInit(char* username,char* password){
 	return user;
 }
 
-/* SIN HACER */
-int userFree(User* user) {
-	
-	return 0;
+/* FIN */
+/* Libera la memoria ocupada por un usuario */
+void userFree(User* user) {
+	int i;
+	char* aux;
+	printf("Liberando memoria del usuario: %s\n", user->username);
+	for(i = 0; i < MAXFRIENDS; i++) {
+		aux = user->friends[i];
+		if(aux != NULL)
+			free(aux);
+		aux = user->friends_request_pending[i];
+		if(aux != NULL)
+			free(aux);
+		aux = user->friends_request_send[i];
+		if(aux != NULL)
+			free(aux);
+		free(user->files[i]);
+	}
+	free(user->username);
+	free(user->password);
+	free(user);
+
 }
 
 /* FIN */
 /* Comprueba si el usuario ya tiene al amigo agregado en la lista de amigos */
-int alreadyFriend(User* usr,char *friendname){
+int alreadyFriend(User* user,char *friendname){
 	int found = 0;
 	int i = 0;
 	char* aux;
 	
 	while(found == 0 && i < MAXFRIENDS){
-		if(usr->friends[i] != NULL){
-			aux = usr->friends[i];
+		if(user->friends[i] != NULL){
+			aux = user->friends[i];
 			if(strcmp(aux,friendname) == 0){
 				found = 1;
 			}
