@@ -58,7 +58,7 @@ int serverInit() {
 			while(!feof(passFile)) {
 				if(fgets(name,100,passFile) != NULL) {
 					name[strlen(name)-1] = '\0';
-					user = userlist[num_user-1];// Coger el usuario actual
+					user = userlist[num_user-1];
 					deliverReqfriend(user,name);
 				}
 			}
@@ -72,7 +72,7 @@ int serverInit() {
 			while(!feof(passFile)) {
 				if(fgets(name,100,passFile) != NULL) {
 					name[strlen(name)-1] = '\0';
-					user = userlist[num_user-1];// Coger el usuario actual
+					user = userlist[num_user-1];
 					deliverReqPending(user,name);
 				}
 			}
@@ -121,17 +121,13 @@ User* getUser(char* username){
 	int found = 0;
 	int i = 0;
 	User *usr = NULL;
-	//printf("numero:%d\n",numUsers);
 	while(i < numUsers && found == 0){
-		//printf("i:%d\n",i);
-		//printf("nombre: %s\n",userlist[i]->username);
 		if(strcmp(username,userlist[i]->username) == 0){
 			found = 1;
 			usr = userlist[i];
 		}
 		i++;
 	}
-	//printf("sale: %s\n",usr->username);
 	return usr;
 }
 
@@ -282,8 +278,6 @@ int makeReq(char* username, char* friendname){
 	// Comprobar que el amigo existe	
 	if(friend == NULL)
 		return -3;
-	//else if(usr->logged == 1) {
-	
 	// Comprobar que el amigo tiene hueco en la lista de amigos
 	if(friend->numFriends == MAXFRIENDS)
 		return -6;
@@ -321,8 +315,6 @@ int makeReq(char* username, char* friendname){
 	else 
 		return -3; // El amigo ya estaba en la lista de enviados
 
-	//}
-	
 	return 0;
 }
 
@@ -375,7 +367,7 @@ int getFriendRequestsPending(User* usr,char* friends[MAX_FRIENDS])
 
 		for(i = 0; i < MAX_FRIENDS; i++)
 		{
-			aux = usr->friends_request_pending[i];
+			aux = usr->friendPending[i];
 
 			if(aux != NULL)
 			{
@@ -595,11 +587,11 @@ int receiveMessage (char* user,int num,char* friendname,struct Message *myMessag
 			return 0;
 		}else
 		{
-			return -2;// No es amigo
+			return -2;
 		}
 	}else
 	{
-		return -1;// No esta online
+		return -1;
 	}
 
 

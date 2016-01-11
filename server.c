@@ -63,7 +63,6 @@ int main(int argc, char **argv){
 	}
 	
 	pthread_mutex_destroy(&mutex);
-	//serverFree();
 	return 0;
 }
 

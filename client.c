@@ -3,7 +3,7 @@
 #include <signal.h>
 
 
-#define NUM_MESSAGES 10
+#define NUM_MESSAGES 5
 char *username, *password;
 int havemsg = 1;
 
@@ -16,7 +16,7 @@ void display_message(int s) {
 	if(havemsg)
 		soap_call_ims__haveMessages(&sp, surl, "", username, &res);
 	if(res > 0) {
-		printf("Tienes %d mensajes sin leer, accede a la lista de amigos para saber mas...\n", res);
+		printf("Tienes %d mensajes sin leer, accede a la lista de amigos para saber cuales\n", res);
 		havemsg = 0;
 	}
     alarm(1);
@@ -287,7 +287,7 @@ void listReq(struct soap soap, char *serverURL) {
 	int numRequestPending = -2;
 	//comprobar si existe alguna peticion
 	soap_call_ims__haveFriendshipRequest(&soap, serverURL,"",username,&numRequestPending);
-	printf("numero de peticiones: %d\n", numRequestPending);
+	printf("Numero de peticiones: %d\n", numRequestPending);
 	if(numRequestPending > 0)
 	{
 		//si existen peticiones, imprimirlas por pantalla
@@ -296,7 +296,7 @@ void listReq(struct soap soap, char *serverURL) {
 
 		for(i=0;i < 100;i++){
 			if(friends->data[i] != NULL){
-				printf("%d: %s\n",i,friends->data[i]);
+				printf("%s\n", friends->data[i]);
 			}
 		}
 	}
@@ -355,15 +355,12 @@ void listFriends(struct soap soap, char *serverURL) {
 		}
 	}else if (numFriends == 0)
 	{
-		//system("clear");
 		printf("No se encontro nigun amigo :S\n");
 	}
 	else if (numFriends == -2){
-		//system("clear");
 		printf("Error del servidor\n");
 	}
 	else if (numFriends == -1){
-		//system("clear");
 		printf("No estas conectado \n");
 	}
 	free(friends);
