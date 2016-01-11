@@ -17,14 +17,14 @@ typedef struct {
 	int logged;
 
 	int numFriends;
-	int numSend;
+	int numSent;
 	int numPending;
 
-	struct Files *files[MAXFRIENDS];
-
 	char* friends[MAXFRIENDS];
-	char* friends_request_send[MAXFRIENDS];
-	char* friends_request_pending[MAXFRIENDS];
+	char* friendSent[MAXFRIENDS];
+	char* friendPending[MAXFRIENDS];
+	
+	struct Files *files[MAXFRIENDS];
 	
 	int doublecheck[MAXFRIENDS];
 

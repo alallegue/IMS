@@ -6,7 +6,7 @@
 #define NUM_MESSAGES 10
 char *username, *password;
 int havemsg = 1;
-
+int logged =0;
 struct soap sp;
 char *surl;
 
@@ -16,13 +16,19 @@ void display_message(int s) {
 	if(havemsg)
 		soap_call_ims__haveMessages(&sp, surl, "", username, &res);
 	if(res > 0) {
-		printf("Tienes %d mensajes sin leer, accede a la lista de amigos para saber mas...\n", res);
+		printf("Tienes %d mensajes sin leer, accede a la lista de amigos para ver cuales\n", res);
 		havemsg = 0;
 	}
     alarm(1);
     signal(SIGALRM, display_message);
 }
-
+void signal_kill_client(int sig)
+{
+	printf("Cerrando por Ctrl+C\n");
+	if(logged)
+		logout(sp,surl);
+	exit(1);
+}
 /* FIN */
 /* Pedir al servidor iniciar sesion con un usuario existente */
 int login(struct soap soap, char *serverURL){
@@ -58,6 +64,7 @@ int login(struct soap soap, char *serverURL){
 		default:
 			username = un;
 			password = pass;
+			logged=1;
 			printf("Logueado correctamente como %s\n", username);
 			break;
 	}
@@ -132,6 +139,7 @@ int logout(struct soap soap,char* serverURL) {
 		return 1;
 	}
 	printf("No hay conexion con el servidor\n");
+	logged=0;
 	return 0;
 }
 
@@ -204,7 +212,7 @@ void readMessage(struct soap soap,char *serverURL) {
 		printf("Ese no es tu amigo\n");
 	}
 	else if(myMessage.operation == -3){
-		printf("No puedes leer mensajes de ti mismo, buscate un amigo\n");
+		printf("No puedes leer mensajes de ti mismo\n");
 	}
 	free(myMessage.name);
 	free(myMessage.msg);
@@ -471,7 +479,7 @@ int main(int argc, char **argv){
 	struct soap soap;
 	char *serverURL;
 	int res;
-
+	signal(SIGINT, signal_kill_client);
 
 	// Usage
 	if (argc != 2) {
