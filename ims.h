@@ -35,3 +35,4 @@ int ims__deleteFriend(char* username, char* friendname, int *error);
 
 int ims__getFriends(char* user ,struct Char_vector *friends);
 int ims__haveFriends(char* user,int *result);
+int ims__haveMessages(char* user, int *result);

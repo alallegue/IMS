@@ -19,7 +19,7 @@ User* userInit(char* username,char* password){
 		user->files[i]->file = NULL;
 		user->files[i]->friendname = NULL;
 		
-		user->doublecheck[i] = NULL;
+		user->doublecheck[i] = 0;
 	}
 
 	user->logged = 0;

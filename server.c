@@ -140,3 +140,8 @@ int ims__getFriends(struct soap *soap, char* user ,struct Char_vector* friends){
 	getFriends(user, friends);
 	return SOAP_OK;
 }
+
+int ims__haveMessages(struct soap *soap, char* user, int *result) {
+	*result = haveMessages(user);
+	return SOAP_OK;
+}

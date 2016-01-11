@@ -1,9 +1,27 @@
 #include "soapH.h"
 #include "imsService.nsmap"
+#include <signal.h>
 
-#define DEBUG_MODE 1
-#define NUM_MESSAGES 5
+
+#define NUM_MESSAGES 10
 char *username, *password;
+int havemsg = 1;
+
+struct soap sp;
+char *surl;
+
+
+void display_message(int s) {
+	int res = 0;
+	if(havemsg)
+		soap_call_ims__haveMessages(&sp, surl, "", username, &res);
+	if(res > 0) {
+		printf("Tienes %d mensajes sin leer, accede a la lista de amigos para saber mas...\n", res);
+		havemsg = 0;
+	}
+    alarm(1);
+    signal(SIGALRM, display_message);
+}
 
 /* FIN */
 /* Pedir al servidor iniciar sesion con un usuario existente */
@@ -15,7 +33,6 @@ int login(struct soap soap, char *serverURL){
 	un = (char*)malloc(256*sizeof(char));
 	pass = (char*)malloc(256*sizeof(char));
 	
-	if(!DEBUG_MODE) system("clear");
 	printf("Acceder a una cuenta ya existente\n");
 	printf("	Introduce nombre de usuario: ");
 	scanf("%s", un);
@@ -359,6 +376,12 @@ void show_menu(struct soap soap, char *serverURL) {
 	int sel;
 	int loop = 0;
 	
+	sp = soap;
+	surl = serverURL;
+	
+	signal(SIGALRM, display_message);
+    alarm(1);
+	
 	while(loop == 0) {
 		printf("	Hola %s. Selecciona una opcion:\n", username);
 		printf("	1) Enviar mensaje a otro usuario\n");
@@ -370,8 +393,10 @@ void show_menu(struct soap soap, char *serverURL) {
 		printf("	7) Borrar amigo\n");
 		printf("	8) Dar de baja esta cuenta\n");
 		printf("	0) Salir\n");
+		havemsg = 1;
 		scanf("%d", &sel);
 		system("clear");
+		havemsg = 0;
 		switch(sel) {
 			case 1:
 				sendMessage(soap, serverURL);
@@ -447,6 +472,7 @@ int main(int argc, char **argv){
 	char *serverURL;
 	int res;
 
+
 	// Usage
 	if (argc != 2) {
 		printf("Usage: %s http://server:port\n",argv[0]);
@@ -456,7 +482,6 @@ int main(int argc, char **argv){
 	soap_init(&soap);
 	// Obtain server address
 	serverURL = argv[1];
-	
 	//Mostrar menú de bienvenida
 	show_login(soap, serverURL);
 	

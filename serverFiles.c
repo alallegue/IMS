@@ -605,3 +605,15 @@ int receiveMessage (char* user,int num,char* friendname,struct Message *myMessag
 
 }
 
+int haveMessages(char* username) {
+	User* user = getUser(username);
+	int num = 0;
+	if(user != NULL) {
+		int i = 0;
+		for(i = 0; i < user->numFriends; i++) {
+			num += user->doublecheck[i];
+		}
+	}
+	return num;
+}
+
