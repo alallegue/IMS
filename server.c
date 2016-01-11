@@ -9,6 +9,8 @@
 
 // Concurrencia 
 pthread_mutex_t mutex;
+struct soap soapptr;
+void signal_kill_handler(int sig);
 
 void *serve_clients(struct soap *soap){
 	struct soap *aux_soap = soap_copy(soap);
@@ -20,12 +22,26 @@ void *serve_clients(struct soap *soap){
 
 }
 
+void signal_kill_handler(int sig)
+{
+
+	printf("Cerrando el servidor por Ctrl+C\n");
+
+	pthread_mutex_destroy(&mutex);
+	//serverFree();
+
+	soap_end(&soapptr);
+
+	exit(1);
+}
+
 int main(int argc, char **argv){ 
 	int m, s;
 	struct soap soap;
 	struct soap soap_aux;
 	
 	pthread_t idHilo;
+	signal(SIGINT, signal_kill_handler);
 	pthread_mutex_init (&mutex, NULL);
 	
   	if (argc < 2) {
@@ -34,6 +50,7 @@ int main(int argc, char **argv){
   	}
 	// Init environment
   	soap_init(&soap);
+  	soapptr=soap;
 	// Bind to the specified port	
 	m = soap_bind(&soap, NULL, atoi(argv[1]), 100);
 	// Check result of binding		
@@ -63,6 +80,7 @@ int main(int argc, char **argv){
 	}
 	
 	pthread_mutex_destroy(&mutex);
+	//serverFree();
 	return 0;
 }
 
