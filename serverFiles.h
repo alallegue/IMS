@@ -10,7 +10,6 @@
 #include <stdio.h>
 
 
-#define DEBUG_MODE 1
 #define DATA_PATH "usuarios/"
 #define MAX_FRIENDS 100
 #define MAX_USERS 100
